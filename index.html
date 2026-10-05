@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en" data-motion="on">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>OBSIDIAN No. 01 — Fragrance concept by 13:33</title>
+    <meta
+      name="description"
+      content="OBSIDIAN No. 01 — an original cinematic fragrance website concept by the digital studio 13:33. Fictional brand and product; portfolio demonstration with no orders or payments."
+    />
+    <meta name="theme-color" content="#0b0c0e" />
+    <meta name="color-scheme" content="dark" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="OBSIDIAN No. 01 — Fragrance concept by 13:33" />
+    <meta property="og:description" content="Dark glass, volcanic stone, amber light. An original fragrance website concept — fictional brand, portfolio demonstration." />
+    <meta property="og:image" content="./og-image.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+    <link rel="preload" href="./fonts/cormorant-garamond-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="./fonts/hanken-grotesk-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <link
+      rel="preload"
+      as="image"
+      type="image/avif"
+      media="(min-width: 900px)"
+      imagesrcset="./media/hero-desktop-960.avif 960w, ./media/hero-desktop-1440.avif 1440w, ./media/hero-desktop-1920.avif 1920w, ./media/hero-desktop-2560.avif 2560w"
+      imagesizes="100vw"
+      fetchpriority="high"
+    />
+    <link
+      rel="preload"
+      as="image"
+      type="image/avif"
+      media="(max-width: 899px)"
+      imagesrcset="./media/hero-mobile-600.avif 600w, ./media/hero-mobile-900.avif 900w, ./media/hero-mobile-1200.avif 1200w"
+      imagesizes="100vw"
+      fetchpriority="high"
+    />
+    <style>
+      /* first paint before CSS loads: correct background, no white flash */
+      html,body{background:#0b0c0e;color:#f2eee7}
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <noscript>
+      <p style="padding:24px;font-family:Georgia,serif">OBSIDIAN No. 01 — an original fragrance website concept by 13:33. Fictional brand and product; portfolio demonstration with no orders or payments. Please enable JavaScript to view the interactive presentation.</p>
+    </noscript>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

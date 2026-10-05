@@ -1,0 +1,52 @@
+.viewer {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-rows: 1fr auto auto;
+  background: var(--bg);
+}
+
+.viewer__stage {
+  position: relative;
+  min-height: 0;
+  cursor: grab;
+  touch-action: pan-y;
+  outline-offset: -2px;
+}
+
+.viewer__stage:active {
+  cursor: grabbing;
+}
+
+.viewer__canvas {
+  width: 100%;
+  height: 100%;
+}
+
+.viewer__help {
+  padding: var(--s1) var(--s2) 0;
+  font-size: var(--fs-label);
+  color: var(--muted);
+  text-align: center;
+}
+
+.viewer__tools {
+  display: flex;
+  justify-content: center;
+  gap: var(--s4);
+  padding-bottom: var(--s1);
+}
+
+.viewer__tools .text-link {
+  background: none;
+  border: 0;
+  cursor: pointer;
+  padding: 0 4px;
+}
+
+.viewer__error {
+  align-self: center;
+  padding: var(--s4);
+  color: var(--muted);
+  text-align: center;
+}

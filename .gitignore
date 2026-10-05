@@ -1,0 +1,15 @@
+node_modules
+dist
+*.log
+.DS_Store
+.env
+.env.*
+# Large render masters and frame sequences stay out of ordinary Git history
+source/renders/
+source/frames/
+source/generated/*.png
+source/fonts/*
+!source/fonts/CormorantGaramond[[]wght].ttf
+!source/fonts/HankenGrotesk[[]wght].ttf
+qa-artifacts/
+__pycache__/
