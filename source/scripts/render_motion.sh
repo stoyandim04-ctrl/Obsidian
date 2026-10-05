@@ -19,7 +19,7 @@ r closing_mobile closing_mobile
 r closing_desktop_b closing_desktop_b
 r closing_mobile_b closing_mobile_b
 echo "loop desktop $(date +%T)"
-$PY source/blender/obsidian_scene.py --shot hero_loop --frames 0:73 --nframes 144 --samples 40 --out source/frames/hero_desktop > "$OUT/loop_desktop.log" 2>&1 || echo "FAIL loop desktop"
+$PY source/blender/obsidian_scene.py --shot hero_loop --frames 0:73 --nframes 144 --samples 28 --out source/frames/hero_desktop > "$OUT/loop_desktop.log" 2>&1 || echo "FAIL loop desktop"
 echo "loop mobile $(date +%T)"
-$PY source/blender/obsidian_scene.py --shot hero_mobile_loop --frames 0:73 --nframes 144 --samples 40 --out source/frames/hero_mobile > "$OUT/loop_mobile.log" 2>&1 || echo "FAIL loop mobile"
+$PY source/blender/obsidian_scene.py --shot hero_mobile_loop --frames 0:73 --nframes 144 --samples 28 --out source/frames/hero_mobile > "$OUT/loop_mobile.log" 2>&1 || echo "FAIL loop mobile"
 echo "motion done $(date +%T)"
