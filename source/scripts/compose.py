@@ -59,8 +59,8 @@ def reference_sheet():
         ("ref_front.png", "Front"),
         ("ref_three_quarter.png", "Three-quarter"),
         ("ref_side.png", "Side"),
-        ("ref_cap.png", "Cap detail"),
-        ("ref_base.png", "Glass-base detail"),
+        ("object_o1.png", "Cap detail"),
+        ("object_o3.png", "Glass-base detail"),
     ]
     cell_w, cell_h = 720, 900
     pad, head, foot = 64, 220, 260
@@ -122,7 +122,7 @@ def og_image():
 
 if __name__ == "__main__":
     og_image()
-    if all(os.path.exists(os.path.join(R, f)) for f in ("ref_front.png", "ref_three_quarter.png", "ref_side.png", "ref_cap.png", "ref_base.png")):
+    if all(os.path.exists(os.path.join(R, f)) for f in ("ref_front.png", "ref_three_quarter.png", "ref_side.png", "object_o1.png", "object_o3.png")):
         reference_sheet()
     else:
         print("reference views not rendered yet")
