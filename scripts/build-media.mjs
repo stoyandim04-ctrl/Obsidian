@@ -25,7 +25,7 @@ const G = (f) => path.join(ROOT, "source", "generated", f);
 
 const JOBS = [
   { key: "hero-desktop", src: R("hero_desktop.png"), widths: [960, 1440, 1920, 2560], lift: true },
-  { key: "hero-mobile", src: R("hero_mobile.png"), widths: [600, 900, 1200], lift: true },
+  { key: "hero-mobile", src: R("hero_mobile.png"), widths: [600, 900, 1080], lift: true },
   { key: "object-o0", src: R("object_o0.png"), widths: [720, 1080, 1440], lift: true },
   { key: "object-o1", src: R("object_o1.png"), widths: [720, 1080, 1440], lift: true },
   { key: "object-o2", src: R("object_o2.png"), widths: [720, 1080, 1440], lift: true },
@@ -34,6 +34,8 @@ const JOBS = [
   { key: "product-100", src: R("product_100.png"), widths: [640, 960, 1280, 1600], lift: true },
   { key: "closing-desktop", src: R("closing_desktop.png"), widths: [1280, 1920, 2560], lift: true },
   { key: "closing-mobile", src: R("closing_mobile.png"), widths: [600, 900, 1200], lift: true },
+  { key: "closing-desktop-b", src: R("closing_desktop_b.png"), widths: [1280, 1920, 2560], lift: true },
+  { key: "closing-mobile-b", src: R("closing_mobile_b.png"), widths: [600, 900, 1200], lift: true },
   { key: "scent-opening", src: G("figma_opening_v1.png"), widths: [600, 900, 1200], grade: true },
   { key: "scent-heart", src: G("figma_heart_v1.png"), widths: [600, 900, 1200], grade: true,
     crop: { left: 120, top: 70, width: 1080, height: 806 } },
@@ -61,6 +63,9 @@ for (const job of JOBS) {
   const master = await base.png().toBuffer({ resolveWithObject: true });
   const { width: W, height: H } = master.info;
   const widths = job.widths.filter((w) => w <= W);
+  // drop stale derivatives of this key (exact pattern, so "closing-desktop" never touches "closing-desktop-b")
+  const stale = new RegExp(`^${job.key}-\\d+\\.(avif|webp|jpg)$`);
+  for (const f of fs.readdirSync(OUT)) if (stale.test(f)) fs.unlinkSync(path.join(OUT, f));
   for (const w of widths) {
     const img = () => sharp(master.data).resize({ width: w });
     await img().avif({ quality: 58, effort: 6, chromaSubsampling: "4:4:4" }).toFile(path.join(OUT, `${job.key}-${w}.avif`));

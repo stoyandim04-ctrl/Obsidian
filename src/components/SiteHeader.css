@@ -140,3 +140,21 @@
     display: inline;
   }
 }
+
+@media (max-width: 379px) {
+  .wordmark {
+    font-size: 1.125rem;
+    letter-spacing: 0.24em;
+    margin-right: -0.24em;
+  }
+  .site-header__actions {
+    gap: 0;
+  }
+  .bag-button,
+  .menu-button {
+    padding: 0 6px;
+  }
+  .menu-button {
+    margin-right: -6px;
+  }
+}

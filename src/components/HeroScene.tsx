@@ -117,7 +117,7 @@ export function HeroScene() {
 
       <div className="hero__foot wrap">
         <p className="concept-note">Concept project by 13:33</p>
-        {showVideo && <MotionPreferenceControls />}
+        <MotionPreferenceControls />
       </div>
     </section>
   );
