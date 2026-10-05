@@ -49,11 +49,12 @@ motion is on; all text is visible immediately with motion off. Disclaimer: the n
 
 | Frame | Image | Source |
 | --- | --- | --- |
-| S1 Opening | bergamot peel curl + black peppercorns on volcanic stone, raking warm light | Figma / Gemini 3.1 Flash Image |
-| S2 Heart | iris petal + cedarwood shaving on ivory travertine, soft side light (cropped) | Figma / Gemini 3.1 Flash Image |
-| S3 Base | amber-coloured resin glowing beside vetiver roots on dark stone | Figma / Gemini 3.1 Flash Image |
+| S1 Opening | bergamot peel curl + jet-black peppercorns on dark stone, one raking warm beam | Higgsfield · Nano Banana Pro 2K |
+| S2 Heart | iris petal + cedarwood shaving on ivory travertine, soft side light | Higgsfield · Nano Banana Pro 2K |
+| S3 Base | amber resin glowing beside vetiver roots on volcanic stone + a 6 s light-movement loop (desktop, motion on) | Higgsfield · Nano Banana Pro 2K (Figma draft as reference) + Seedance 2.0 image-to-video |
 
-Deviation: the generated peppercorns read dark brown rather than jet black; accepted as natural.
+Deviations: the Opening stone reads as smooth slate more than porous basalt. Video was added only to the
+Base chapter, where moving light through resin is the scene's subject; Opening and Heart stay still.
 
 ## Product selection (`ProductSelection.tsx`, `ProductViewer.tsx`)
 

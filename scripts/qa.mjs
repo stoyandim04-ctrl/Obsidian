@@ -171,7 +171,7 @@ const browser = await chromium.launch();
 {
   const { c, page, errors } = await ctx(browser, { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2 });
   await page.goto(URL, { waitUntil: "networkidle" });
-  const menu = page.getByRole("button", { name: "Menu" });
+  const menu = page.locator(".menu-button");
   await menu.click();
   check("mobile menu expands", (await menu.getAttribute("aria-expanded")) === "true");
   await page.locator(".mobile-menu a", { hasText: "Discover" }).click();

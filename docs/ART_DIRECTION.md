@@ -106,6 +106,6 @@ the macro shots (fixed by lowering the camera to 3–4°).
 
 ## Imagery for scent chapters
 
-Generated still lifes (Figma → Gemini 3.1 Flash Image) graded in `build-media.mjs`
-(saturation 0.86, slight warm channel balance). The heart chapter is cropped to remove a bright window.
-No bottle, no text, no logos in generated images.
+Generated still lifes (Higgsfield → Nano Banana Pro, 2400×1792; first drafts in Figma) graded in
+`build-media.mjs` (saturation 0.86, slight warm channel balance) so they share the campaign palette.
+No bottle, no text, no logos in generated media — the product only ever comes from Blender.

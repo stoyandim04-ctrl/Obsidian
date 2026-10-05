@@ -10,8 +10,8 @@ connector system; nothing in the site bundle talks to a generation service.
 | --- | --- | --- | --- |
 | Canonical 3D bottle, product renders, hero motion frames | **Blender 4.2 (`bpy` wheel) + Cycles CPU** | ✅ Installed in `/opt/bpyenv` | Rendered every product image in `source/renders/` |
 | Deterministic bottle typography | **Pillow + OFL fonts** (`source/scripts/make_label.py`) | ✅ | Label textures in `source/textures/` |
-| Image generation (scent still lifes) | **Figma MCP → `generate_image` (gemini-3.1-flash-image)** | ✅ Connected (team plan "Stoyan Dimitrov's team", Starter) | 3 generations downloaded to `source/generated/` |
-| Image / video generation | **Higgsfield MCP** (`https://mcp.higgsfield.ai/mcp`) | ⚠️ Connected, **0 credits** | `balance` → `{"credits":0,"subscription_plan_type":"free"}`; cost pre-flight only |
+| Image generation (first scent drafts) | **Figma MCP → `generate_image` (gemini-3.1-flash-image)** | ✅ Connected (team plan "Stoyan Dimitrov's team", Starter) | 3 drafts in `source/generated/`; base draft reused as Higgsfield reference |
+| Image / video generation | **Higgsfield MCP** (`https://mcp.higgsfield.ai/mcp`) | ✅ Connected (Lite plan, private workspace) | 4 image + 1 video generations; 62 credits spent (see below) |
 | Web derivatives (AVIF/WebP/JPEG) | **sharp 0.35** (`scripts/build-media.mjs`) | ✅ | `public/media/*` |
 | Video encode / reel edit | **ffmpeg** (system) | ✅ | `public/media/hero-loop-*.mp4`, `portfolio/reel/*` |
 | Browser QA and screenshots | **Playwright 1.56.1 + bundled Chromium 1194** | ✅ | `scripts/qa.mjs`, `scripts/shots.mjs` |
@@ -34,18 +34,25 @@ read-only calls (`balance`, `models_explore`, `get_cost`). Per the official help
 
 So a web subscription with "unlimited" generations does **not** make MCP generations free.
 
-**Blocker:** the account is on the free plan with 0 credits, so no Higgsfield generation was run.
-Pre-flight costs (no charge, `get_cost: true`):
+**History:** at the start of the session the connector reported `{"credits":0,"subscription_plan_type":"free"}`,
+so nothing was generated. After the owner's account showed 250 credits (Lite plan), `list_workspaces` and
+`balance` returned 250 credits in the private workspace and generation went ahead within the owner's
+**150-credit ceiling**.
 
-| Request | Credits |
-| --- | --- |
-| `nano_banana_pro`, 16:9, 2K image | 2 |
-| `seedance_2_0`, 6 s, 1080p, no audio | 54 |
+**Spend (from `transactions`, 2026-10-05):**
 
-**Owner action (only if you want Higgsfield output):**
-1. Sign in at <https://higgsfield.ai> with the same account the connector uses.
-2. Add credits yourself (Claude cannot purchase). The agreed ceiling for this project is **150 credits**.
-3. Tell the session "готово"; it will re-check `balance` before any paid request and stop at three attempts per shot.
+| Time (UTC) | Item | Credits |
+| --- | --- | --- |
+| 23:13:44 | Nano Banana Pro 2K — Opening still | −2 |
+| 23:13:44 | Nano Banana Pro 2K — Heart still | −2 |
+| 23:13:44 | Nano Banana Pro 2K — Base still (rejected: composition) | −2 |
+| 23:15:26 | Nano Banana Pro 2K — Base still from the Figma draft as reference (accepted) | −2 |
+| 23:16:27 | Seedance 2.0, 6 s, 1080p, no audio — Base light-movement loop | −54 |
+| | **Total** | **−62** (balance after: 188) |
+
+Every request was cost-preflighted with `get_cost: true` and sent with `use_unlim: false`. Media upload for
+the reference image used the presigned PUT returned by `media_upload` (requires the `If-None-Match: *`
+header listed in its signed headers) followed by `media_confirm`.
 
 The REST API (<https://docs.higgsfield.ai/>) uses a separate server-side key pair
 (`Authorization: Key ${HF_API_KEY_ID}:${HF_API_KEY_SECRET}`, created at <https://console.higgsfield.ai>).

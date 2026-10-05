@@ -36,10 +36,10 @@ const JOBS = [
   { key: "closing-mobile", src: R("closing_mobile.png"), widths: [600, 900, 1200], lift: true },
   { key: "closing-desktop-b", src: R("closing_desktop_b.png"), widths: [1280, 1920, 2560], lift: true },
   { key: "closing-mobile-b", src: R("closing_mobile_b.png"), widths: [600, 900, 1200], lift: true },
-  { key: "scent-opening", src: G("figma_opening_v1.png"), widths: [600, 900, 1200], grade: true },
-  { key: "scent-heart", src: G("figma_heart_v1.png"), widths: [600, 900, 1200], grade: true,
-    crop: { left: 120, top: 70, width: 1080, height: 806 } },
-  { key: "scent-base", src: G("figma_base_v1.png"), widths: [600, 900, 1200], grade: true },
+  // Scent stills: Higgsfield (Nano Banana Pro, 2400×1792). Figma originals kept in source/generated for provenance.
+  { key: "scent-opening", src: G("hf_opening_v1.png"), widths: [640, 960, 1280, 1600, 2000], grade: true },
+  { key: "scent-heart", src: G("hf_heart_v1.png"), widths: [640, 960, 1280, 1600, 2000], grade: true },
+  { key: "scent-base", src: G("hf_base_v2.png"), widths: [640, 960, 1280, 1600, 2000], grade: true },
 ];
 
 const filter = process.argv[2];

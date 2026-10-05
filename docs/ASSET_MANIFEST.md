@@ -38,32 +38,51 @@ Other deterministic outputs:
 | `public/og-image.jpg` (1200×630) | `source/scripts/compose.py` from `hero_desktop.png` |
 | `portfolio/reference/obsidian-no01-reference-sheet.jpg` | `source/scripts/compose.py` |
 
-## Generated still lifes (scent chapters)
+## Generated still lifes and motion (scent chapters)
 
-Tool: Figma MCP `generate_image`, model **`gemini-3.1-flash-image`**, plan `team::1637246835953568716`.
-Requested 2048×1536; returned **1200×896 PNG**. No reference image (product never appears in these).
-Post: `build-media.mjs` grade (saturation 0.86, brightness 0.97, channel balance 1.02/1.00/0.95); heart
-cropped to 1080×806 at (120, 70) to remove a bright window.
+### Used on the site — Higgsfield
 
-**Rights status: not independently verified for commercial use.** Figma's AI terms and the underlying
-model provider's terms govern use of these outputs; review them (Figma → Settings → AI, and Figma's AI
-terms) before using the images outside this portfolio concept. They contain no third-party brands,
-people or text.
+Tool: Higgsfield MCP. Requested model `nano_banana_pro` (Google Nano Banana Pro), 4:3, `resolution: 2k`;
+the job records report the backend model as `nano_banana_2`. Output 2400×1792 PNG. Post-processing in
+`build-media.mjs`: saturation 0.86, brightness 0.97, channel balance 1.02/1.00/0.95 → derivatives
+`scent-{opening,heart,base}-{640,960,1280,1600,2000}`.
 
-| Master (`source/generated/`) | Derivative key | Prompt |
-| --- | --- | --- |
-| `figma_opening_v1.png` | `scent-opening` | "Editorial still life photograph for a luxury fragrance campaign. One expressive curled strip of fresh bergamot peel, green-yellow with clearly visible citrus pores and oil glands, and five black peppercorns, resting on a slab of charcoal-black volcanic basalt with fine porous texture. Controlled diagonal warm raking light from the upper right, deep soft shadows, restrained muted colour palette of charcoal, warm brown and a single note of bergamot yellow-green. Sculptural, minimal composition with generous dark negative space on the left third. Shot on medium format, 100mm macro lens, shallow but usable depth of field, photorealistic, tactile. No bottle, no text, no logo, no liquid splash, no smoke, no extra props." |
-| `figma_heart_v1.png` | `scent-heart` | "Editorial macro still life photograph for a luxury fragrance campaign. A single delicate pale lavender-grey iris petal with fine translucent veins, resting beside one sculptural curled shaving of cedarwood with visible grain, on a warm ivory mineral surface like honed travertine. Soft directional window light from the left, quiet organic texture, subtle soft shadows, calm and airy, refined muted palette of ivory, warm sand, pale lilac grey and light cedar brown. Minimal composition, generous negative space on the right third. Medium format, 100mm macro lens, shallow but usable depth of field, photorealistic, tactile. No bottle, no text, no logo, no bouquet, no whole flower, no extra props." |
-| `figma_base_v1.png` | `scent-base` | "Abstract fragrance still life photograph for a luxury campaign. Warm amber light passing through a small smooth irregular piece of translucent amber-coloured resin, glowing from within, placed beside a small bundle of dry, fibrous vetiver roots on dark textured volcanic stone. Deep brown, burnt umber and muted gold tones, low-key lighting from behind and the side, intimate and restrained, realistic surface detail, generous dark negative space on the left third. Medium format, 100mm macro lens, shallow but usable depth of field, photorealistic. No bottle, no text, no logo, no cut gemstones, no jewellery, no smoke, no extra props." |
+| Master (`source/generated/`) | Job id | Reference | Prompt summary (full text below) |
+| --- | --- | --- | --- |
+| `hf_opening_v1.png` | `2a5119fb-3803-4d48-880e-f623267c99db` | none | One long curl of fresh bergamot peel with visible pores and white pith, five jet-black peppercorns, charcoal porous volcanic basalt, single diagonal warm beam from upper right, muted palette, dark negative space left; medium format 100 mm f/5.6; no bottle/text/logo/splash/droplets/smoke/lime/lemon slices. |
+| `hf_heart_v1.png` | `2122a355-cfa9-475c-8e41-d73efedec8a1` | none | Single pale lavender-grey iris petal with violet veins beside a curled pale cedarwood shaving on honed ivory travertine, soft daylight from the left, no visible window; muted ivory/sand/lilac/cedar palette; medium format 100 mm f/5.6; no bottle/text/logo/bouquet/whole flower. |
+| `hf_base_v1.png` | `061d7445-059c-4915-9ee2-3089c814d377` | none | **Rejected** — hard black vertical panel, orange backdrop, oversized roots. |
+| `hf_base_v2.png` | `fdf2aff6-eef0-4031-a674-aa23c993d607` | `figma_base_v1.png` uploaded as media `a1e25e23-a5e1-44a8-b3b9-eb5433398246` | "Recreate the supplied reference photograph faithfully at higher fidelity: keep the same composition, camera angle, lighting direction and objects…" amber resin nugget glowing, vetiver bundle tied with twine, dark porous volcanic stone, low-key light, dark negative space left; no text/logo/bottle/faceted gemstones/insects. |
+| `hf_base_motion_v1.mp4` (1664×1248, 24 fps, 6.04 s, H.264, silent) | `cf273d5c-46a1-4174-badc-d69a070d60d1` | `hf_base_v2` job as both `start_image` and `end_image` | "Locked-off static macro shot, the camera does not move at all. Only the light changes: a soft warm beam slowly drifts across the translucent amber resin… The resin, the vetiver roots, the twine and the stone stay perfectly still and keep their exact shape and position. No smoke, no particles… Ends exactly as it begins for a seamless loop." Model `seedance_2_0`, mode std, 1080p, `generate_audio: false`. |
 
-Attempts: one per scene (all three accepted on first attempt after visual inspection).
-Inspection notes: no watermarks, no text, no bottles; peppercorns read dark brown; the heart image showed
-a bright window (cropped).
+Full prompts (sent verbatim):
 
-## Higgsfield
+- **Opening** — "Editorial still life photograph for a restrained luxury fragrance campaign. One long expressive curl of fresh bergamot peel — pale green-yellow, clearly visible citrus pores and oil glands, a cut edge showing white pith — and five jet-black peppercorns with dry wrinkled texture, resting on a slab of charcoal-black porous volcanic basalt. A single controlled diagonal beam of warm light rakes from the upper right, deep soft shadows, the rest of the frame falls into near-black. Muted palette: charcoal, warm umber, one quiet note of bergamot green-yellow. Sculptural minimal composition, subject in the right half, generous dark negative space on the left third. Medium format camera, 100mm macro lens, f/5.6, realistic depth of field, photorealistic, tactile. No bottle, no text, no logo, no liquid splash, no droplets, no smoke, no extra props, no lime, no lemon slices."
+- **Heart** — "Editorial macro still life photograph for a restrained luxury fragrance campaign. A single delicate iris petal, pale lavender-grey with fine translucent violet veins and a soft curl at its edge, rests beside one sculptural curled shaving of pale cedarwood with visible fine grain, on a honed warm ivory travertine surface with subtle natural pores. Soft directional daylight from the left, quiet airy atmosphere, gentle soft-edged shadows, no bright window or light source visible in frame. Refined muted palette: ivory, warm sand, pale lilac grey, light cedar brown. Minimal composition with the subjects in the left half and calm negative space on the right third. Medium format camera, 100mm macro lens, f/5.6, realistic depth of field, photorealistic, tactile. No bottle, no text, no logo, no bouquet, no whole flower, no extra props."
+- **Base v1 (rejected)** — "Abstract still life photograph for a restrained luxury fragrance campaign. Warm amber light passes through a small smooth irregular nugget of translucent amber-coloured natural resin, glowing softly from within with tiny natural inclusions, placed beside a loose bundle of dry fibrous vetiver roots, on dark textured volcanic stone. Low-key lighting from behind and the side, the rest of the frame in deep shadow. Deep brown, burnt umber and muted gold tones, intimate and quiet, realistic surface detail. Subjects in the right half, generous dark negative space on the left third. Medium format camera, 100mm macro lens, f/5.6, realistic depth of field, photorealistic. No bottle, no text, no logo, no cut or faceted gemstones, no jewellery, no insects, no smoke, no extra props."
+- **Base v2 (used)** — "Recreate the supplied reference photograph faithfully at higher fidelity: keep the same composition, camera angle, lighting direction and objects. A small smooth irregular nugget of translucent amber-coloured natural resin glowing warmly from within, beside a small bundle of dry fibrous vetiver roots tied with natural twine, on dark porous volcanic stone. Low-key light from behind and the side, deep shadows, generous dark negative space on the left. Deep brown, burnt umber and muted gold tones. Sharper realistic surface detail of the resin, roots and stone, natural film-like grain, photorealistic medium format 100mm macro look. No text, no logo, no bottle, no faceted gemstones, no insects, no extra props."
+- **Base motion** — "Locked-off static macro shot, the camera does not move at all. Only the light changes: a soft warm beam slowly drifts across the translucent amber resin from left to right and back, so its inner glow gently brightens, shifts through the inclusions and softens again, and a faint warm highlight travels over the porous stone. The resin, the vetiver roots, the twine and the stone stay perfectly still and keep their exact shape and position. No smoke, no particles, no dust, no flicker, no new objects, no zoom, no cuts. Slow, calm, intimate, photorealistic. Ends exactly as it begins for a seamless loop."
 
-No Higgsfield generation was run (account balance 0 credits). Cost pre-flights only; see
-`docs/TOOL_SETUP.md`.
+Video QA: resin outline compared at frames 0 / 72 / 144 (no morphing observed); first-vs-last frame RMSE
+2.4 % (loop seam barely perceptible). Web file: `public/media/scent-base-loop.mp4`, 1280×960, CRF 22,
+same grade as the still, 1.0 MB, desktop-only, plays only in view with motion on.
+
+### Drafts — Figma (not shown on the site)
+
+Tool: Figma MCP `generate_image`, model `gemini-3.1-flash-image`, plan `team::1637246835953568716`;
+1200×896 PNG. `figma_opening_v1.png`, `figma_heart_v1.png`, `figma_base_v1.png`. The base draft is the
+reference for `hf_base_v2`. Prompts:
+
+- Opening — "Editorial still life photograph for a luxury fragrance campaign. One expressive curled strip of fresh bergamot peel, green-yellow with clearly visible citrus pores and oil glands, and five black peppercorns, resting on a slab of charcoal-black volcanic basalt with fine porous texture. Controlled diagonal warm raking light from the upper right, deep soft shadows, restrained muted colour palette of charcoal, warm brown and a single note of bergamot yellow-green. Sculptural, minimal composition with generous dark negative space on the left third. Shot on medium format, 100mm macro lens, shallow but usable depth of field, photorealistic, tactile. No bottle, no text, no logo, no liquid splash, no smoke, no extra props."
+- Heart — "Editorial macro still life photograph for a luxury fragrance campaign. A single delicate pale lavender-grey iris petal with fine translucent veins, resting beside one sculptural curled shaving of cedarwood with visible grain, on a warm ivory mineral surface like honed travertine. Soft directional window light from the left, quiet organic texture, subtle soft shadows, calm and airy, refined muted palette of ivory, warm sand, pale lilac grey and light cedar brown. Minimal composition, generous negative space on the right third. Medium format, 100mm macro lens, shallow but usable depth of field, photorealistic, tactile. No bottle, no text, no logo, no bouquet, no whole flower, no extra props."
+- Base — "Abstract fragrance still life photograph for a luxury campaign. Warm amber light passing through a small smooth irregular piece of translucent amber-coloured resin, glowing from within, placed beside a small bundle of dry, fibrous vetiver roots on dark textured volcanic stone. Deep brown, burnt umber and muted gold tones, low-key lighting from behind and the side, intimate and restrained, realistic surface detail, generous dark negative space on the left third. Medium format, 100mm macro lens, shallow but usable depth of field, photorealistic. No bottle, no text, no logo, no cut gemstones, no jewellery, no smoke, no extra props."
+
+### Rights status
+
+**Not independently verified for commercial use.** Higgsfield's terms of service (and those of the
+underlying model providers, Google and ByteDance) and Figma's AI terms govern these outputs. Review them
+before using the images or the clip outside this portfolio concept. The outputs contain no third-party
+brands, people or text, and no product: the bottle never appears in generated media.
 
 ## Fonts
 

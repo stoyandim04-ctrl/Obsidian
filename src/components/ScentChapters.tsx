@@ -1,4 +1,7 @@
+import { useEffect, useRef, useState } from "react";
 import { Picture } from "./Picture";
+import { useMotion } from "../media/motion";
+import { useInView, useMediaQuery } from "../media/hooks";
 import { Reveal } from "./Reveal";
 import { SCENT_CHAPTERS } from "../data/product";
 import "./ScentChapters.css";
@@ -27,6 +30,7 @@ export function ScentChapters() {
           <div className="wrap grid scent__grid">
             <Reveal className="scent__image">
               <Picture name={c.image} alt={c.alt} sizes="(min-width: 900px) 56vw, 100vw" />
+              {"video" in c && <AmbientVideo src={c.video} />}
             </Reveal>
             <Reveal className="scent__text">
               <p className="label scent__act">
@@ -42,5 +46,52 @@ export function ScentChapters() {
         </article>
       ))}
     </section>
+  );
+}
+
+/**
+ * Decorative loop layered over its matching still. Attached only on desktop with motion on,
+ * fetched when the row approaches the viewport, paused off-screen; the still remains the fallback.
+ */
+function AmbientVideo({ src }: { src: string }) {
+  const { enabled } = useMotion();
+  const desktop = useMediaQuery("(min-width: 900px)");
+  const box = useRef<HTMLDivElement>(null);
+  const video = useRef<HTMLVideoElement>(null);
+  const near = useInView(box, "300px 0px");
+  const visible = useInView(box);
+  const [attached, setAttached] = useState(false);
+  const [playing, setPlaying] = useState(false);
+  const [failed, setFailed] = useState(false);
+  const allowed = enabled && desktop && !failed;
+
+  if (allowed && near && !attached) setAttached(true);
+
+  useEffect(() => {
+    const v = video.current;
+    if (!v) return;
+    if (allowed && visible) v.play().catch(() => setPlaying(false));
+    else v.pause();
+  }, [allowed, visible, attached]);
+
+  return (
+    <div ref={box} className="scent__motion" aria-hidden="true">
+      {attached && allowed && (
+        <video
+          ref={video}
+          className={playing ? "is-playing" : undefined}
+          src={`${import.meta.env.BASE_URL}media/${src}`}
+          muted
+          loop
+          playsInline
+          preload="auto"
+          tabIndex={-1}
+          disablePictureInPicture
+          onPlaying={() => setPlaying(true)}
+          onPause={() => setPlaying(false)}
+          onError={() => setFailed(true)}
+        />
+      )}
+    </div>
   );
 }
