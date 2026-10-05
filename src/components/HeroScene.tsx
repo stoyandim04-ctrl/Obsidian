@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Picture } from "./Picture";
+import { LoopVideo } from "./LoopVideo";
 import { MotionPreferenceControls } from "./MotionPreferenceControls";
 import { useMotion } from "../media/motion";
 import { useInView, useMediaQuery } from "../media/hooks";
@@ -7,8 +8,8 @@ import "./HeroScene.css";
 
 const BASE = import.meta.env.BASE_URL;
 const VIDEO = {
-  desktop: { src: `${BASE}media/hero-loop-desktop.mp4`, poster: `${BASE}media/hero-desktop-1440.jpg` },
-  mobile: { src: `${BASE}media/hero-loop-mobile.mp4`, poster: `${BASE}media/hero-mobile-900.jpg` },
+  desktop: { src: "hero-loop-desktop", poster: `${BASE}media/hero-desktop-1440.jpg` },
+  mobile: { src: "hero-loop-mobile", poster: `${BASE}media/hero-mobile-900.jpg` },
 };
 
 /** Wait for the page to finish loading and the main thread to go idle before fetching heavy media. */
@@ -77,19 +78,12 @@ export function HeroScene() {
           className="hero__poster"
         />
         {showVideo && (
-          <video
+          <LoopVideo
             key={variant.src}
             ref={video}
-            className={`hero__video${playing && enabled ? " is-playing" : ""}`}
-            src={variant.src}
+            name={variant.src}
             poster={variant.poster}
-            muted
-            loop
-            playsInline
-            preload="auto"
-            aria-hidden="true"
-            tabIndex={-1}
-            disablePictureInPicture
+            className={`hero__video${playing && enabled ? " is-playing" : ""}`}
             onPlaying={() => setPlayingSrc(variant.src)}
             onPause={() => setPlayingSrc(null)}
             onError={() => setFailedSrc(variant.src)}

@@ -235,12 +235,12 @@ def mat_stone():
     n1.inputs["Detail"].default_value = 12.0
     n1.inputs["Roughness"].default_value = 0.65
     vor = nt.nodes.new("ShaderNodeTexVoronoi")
-    vor.inputs["Scale"].default_value = 120.0
+    vor.inputs["Scale"].default_value = 70.0
     nt.links.new(tc.outputs["Object"], n1.inputs["Vector"])
     nt.links.new(tc.outputs["Object"], vor.inputs["Vector"])
     ramp = nt.nodes.new("ShaderNodeValToRGB")
-    ramp.color_ramp.elements[0].color = (0.010, 0.010, 0.010, 1)
-    ramp.color_ramp.elements[1].color = (0.040, 0.037, 0.034, 1)
+    ramp.color_ramp.elements[0].color = (0.006, 0.006, 0.006, 1)
+    ramp.color_ramp.elements[1].color = (0.022, 0.020, 0.018, 1)
     nt.links.new(n1.outputs["Fac"], ramp.inputs["Fac"])
     nt.links.new(ramp.outputs["Color"], b.inputs["Base Color"])
     b.inputs["Roughness"].default_value = 0.78
@@ -249,12 +249,12 @@ def mat_stone():
     nt.links.new(n1.outputs["Fac"], mixh.inputs[0])
     vmul = nt.nodes.new("ShaderNodeMath")
     vmul.operation = "MULTIPLY"
-    vmul.inputs[1].default_value = 0.35
+    vmul.inputs[1].default_value = 0.9
     nt.links.new(vor.outputs["Distance"], vmul.inputs[0])
     nt.links.new(vmul.outputs["Value"], mixh.inputs[1])
     bump = nt.nodes.new("ShaderNodeBump")
-    bump.inputs["Strength"].default_value = 0.35
-    bump.inputs["Distance"].default_value = 0.02
+    bump.inputs["Strength"].default_value = 0.6
+    bump.inputs["Distance"].default_value = 0.03
     nt.links.new(mixh.outputs["Value"], bump.inputs["Height"])
     nt.links.new(bump.outputs["Normal"], b.inputs["Normal"])
     nt.links.new(b.outputs["BSDF"], out.inputs["Surface"])
@@ -705,7 +705,8 @@ def shot(name, size_ml="50"):
     exclude_from(lights["top"], cap_obj, *pl)
     if plinth_obj:
         exclude_from(lights["key"], plinth_obj)
-        rake = area("StoneRake", (3.0, -0.4, 0.35), (0, 0, 0.2), 0.4, 2.0, 40, WARM, spread=30)
+        exclude_from(lights["strip_l"], plinth_obj)
+        rake = area("StoneRake", (3.0, -0.4, 0.35), (0, 0, 0.2), 0.4, 2.0, 30, WARM, spread=30)
         rake.rotation_euler.rotate_axis("Z", math.radians(90))
         only_lights(rake, plinth_obj)
     # print light: a soft source beside the lens that lights only the screen print,

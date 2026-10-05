@@ -74,6 +74,6 @@ export const SCENT_CHAPTERS = [
     alt: "Warm light glowing through a piece of amber-coloured resin beside dry vetiver roots on dark stone.",
     tone: "dark",
     /** Decorative light-movement loop (desktop, motion on, in view only). */
-    video: "scent-base-loop.mp4",
+    video: "scent-base-loop",
   },
 ] as const;

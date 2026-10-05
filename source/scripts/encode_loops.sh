@@ -12,8 +12,12 @@ enc() { # name width height crf maxrate
     -vf "fps=24,scale=${w}:${h}:flags=lanczos,${LIFT},format=yuv420p" \
     -c:v libx264 -profile:v high -preset veryslow -crf "$crf" -maxrate "$maxrate" -bufsize "$maxrate" \
     -g 48 -movflags +faststart -an "public/media/hero-loop-${name#hero_}.mp4"
+  # VP9/WebM first in the <source> list: smaller, and playable in open-source Chromium builds
+  ffmpeg -y -v error -f concat -safe 0 -i "$list" \
+    -vf "fps=24,scale=${w}:${h}:flags=lanczos,${LIFT},format=yuv420p" \
+    -c:v libvpx-vp9 -b:v 0 -crf "$((crf + 13))" -row-mt 1 -deadline good -cpu-used 1 -g 48 -an "public/media/hero-loop-${name#hero_}.webm"
   rm -f "$list"
-  ls -la "public/media/hero-loop-${name#hero_}.mp4"
+  ls -la "public/media/hero-loop-${name#hero_}".*
 }
 enc hero_desktop 1920 1080 20 8M
 enc hero_mobile 720 1280 21 4M

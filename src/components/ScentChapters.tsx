@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Picture } from "./Picture";
+import { LoopVideo } from "./LoopVideo";
 import { useMotion } from "../media/motion";
 import { useInView, useMediaQuery } from "../media/hooks";
 import { Reveal } from "./Reveal";
@@ -77,16 +78,10 @@ function AmbientVideo({ src }: { src: string }) {
   return (
     <div ref={box} className="scent__motion" aria-hidden="true">
       {attached && allowed && (
-        <video
+        <LoopVideo
           ref={video}
+          name={src}
           className={playing ? "is-playing" : undefined}
-          src={`${import.meta.env.BASE_URL}media/${src}`}
-          muted
-          loop
-          playsInline
-          preload="auto"
-          tabIndex={-1}
-          disablePictureInPicture
           onPlaying={() => setPlaying(true)}
           onPause={() => setPlaying(false)}
           onError={() => setFailed(true)}

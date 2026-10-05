@@ -14,6 +14,8 @@ r object_o1 object_o1
 r object_o2 object_o2
 r object_o3 object_o3
 r ref_base ref_base
+r closing_desktop closing_desktop
+r closing_mobile closing_mobile
 r closing_desktop_b closing_desktop_b
 r closing_mobile_b closing_mobile_b
 echo "loop desktop $(date +%T)"
