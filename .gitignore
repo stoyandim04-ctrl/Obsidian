@@ -13,3 +13,4 @@ source/fonts/*
 !source/fonts/HankenGrotesk[[]wght].ttf
 qa-artifacts/
 __pycache__/
+artifact/
