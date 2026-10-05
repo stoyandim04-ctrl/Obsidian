@@ -32,7 +32,7 @@ function whenIdle(cb: () => void): () => void {
 
 export function HeroScene() {
   const { enabled } = useMotion();
-  const desktop = useMediaQuery("(min-width: 900px)");
+  const desktop = useMediaQuery("(min-width: 600px)"); // landscape composition from tablet width up
   const section = useRef<HTMLElement>(null);
   const video = useRef<HTMLVideoElement>(null);
   const inView = useInView(section);
@@ -71,7 +71,7 @@ export function HeroScene() {
       <div className="hero__media">
         <Picture
           name="hero-desktop"
-          mobile={{ name: "hero-mobile", media: "(max-width: 899px)" }}
+          mobile={{ name: "hero-mobile", media: "(max-width: 599px)" }}
           alt="OBSIDIAN No. 01 — a smoked black glass perfume bottle with a satin black cap and a fine brass ring, lit by a warm edge light."
           sizes="100vw"
           priority
