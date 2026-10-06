@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Reveal film (hero → object → cap → atomizer → spray): every 2nd frame of a 240-frame path,
-# 120 frames desktop (16:9, 1920×1080) + 120 frames mobile (9:16, 1080×1920). Existing frames are skipped.
+# 120 frames desktop (16:9, 1280×720) + 120 frames mobile (9:16, 576×1024). Existing frames are skipped.
 set -u
 cd "$(dirname "$0")/../.."
 PY=/opt/bpyenv/bin/python

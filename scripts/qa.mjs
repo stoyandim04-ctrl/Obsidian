@@ -233,6 +233,94 @@ await browser.close();
   await b.close();
 }
 
+// ---------------------------------------------------------------- film frame sets are complete
+// (vite preview answers unknown paths with index.html, so a missing frame would otherwise go unnoticed)
+{
+  const b = await chromium.launch();
+  const { c, page } = await ctx(b);
+  await page.goto(URL, { waitUntil: "domcontentloaded" });
+  for (const [dir, n] of [["reveal-d", 120], ["reveal-m", 120], ["notes-d", 264], ["notes-m", 264]]) {
+    const bad = await page.evaluate(async ([d, nn]) => {
+      const out = [];
+      await Promise.all(Array.from({ length: nn }, async (_, i) => {
+        const r = await fetch(`media/film/${d}/${String(i).padStart(4, "0")}.webp`, { method: "HEAD" });
+        if (!r.ok || !(r.headers.get("content-type") ?? "").includes("image/webp")) out.push(i);
+      }));
+      return out.sort((x, y) => x - y);
+    }, [dir, n]);
+    check(`film frames ${dir}: ${n} WebP files`, bad.length === 0, bad.length ? `missing ${bad.length}, first ${bad.slice(0, 5).join(",")}` : "");
+  }
+  await c.close();
+  await b.close();
+}
+
+// ---------------------------------------------------------------- copy contrast over the films
+// For each chapter: hide the copy, screenshot the film behind each text block, and compare the text
+// colour with the worst-case background (95th / 5th luminance percentile for light / dark text).
+{
+  const sharp = (await import("sharp")).default;
+  const lin = (v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; };
+  const L = (r, g, b) => 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
+  const ratio = (a, b2) => (Math.max(a, b2) + 0.05) / (Math.min(a, b2) + 0.05);
+  const POINTS = [["#top", [0.05, 0.25, 0.46, 0.63, 0.91]], ["#fragrance", [0.05, 0.2, 0.43, 0.66, 0.95]]];
+  for (const [label, opts] of [
+    ["desktop", { viewport: { width: 1440, height: 900 } }],
+    ["mobile", { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2 }],
+  ]) {
+    const b = await chromium.launch();
+    const { c, page } = await ctx(b, opts);
+    await page.goto(URL, { waitUntil: "networkidle" });
+    let worst = { r: 99, where: "" };
+    let fails = [];
+    for (const [sel, ps] of POINTS) {
+      for (const p of ps) {
+        await page.evaluate(([s, pp]) => {
+          const el = document.querySelector(s);
+          window.scrollTo({ top: el.getBoundingClientRect().top + scrollY + (el.offsetHeight - innerHeight) * pp, behavior: "instant" });
+        }, [sel, p]);
+        await page.waitForTimeout(1200);
+        const blocks = await page.evaluate((s) => {
+          const copies = [...document.querySelectorAll(`${s} .film__copy`)];
+          const top = copies.reduce((a, x) => (Number(getComputedStyle(x).opacity) > Number(getComputedStyle(a).opacity) ? x : a));
+          const items = [...top.querySelectorAll("h1, h2, h3, p")].filter((e) => e.offsetWidth && !e.closest(".btn")).map((e) => {
+            const r = e.getBoundingClientRect();
+            const cs = getComputedStyle(e);
+            const px = parseFloat(cs.fontSize);
+            const large = px >= 24 || (px >= 18.66 && Number(cs.fontWeight) >= 700);
+            return { tag: e.tagName, text: e.textContent.slice(0, 28), color: cs.color, x: r.left, y: r.top, w: r.width, h: r.height, large };
+          });
+          document.querySelectorAll(`${s} .film__copy`).forEach((x) => (x.style.visibility = "hidden"));
+          return items;
+        }, sel);
+        await page.waitForTimeout(100);
+        const shot = await page.screenshot();
+        await page.evaluate((s) => document.querySelectorAll(`${s} .film__copy`).forEach((x) => (x.style.visibility = "")), sel);
+        const meta = await sharp(shot).metadata();
+        const scale = meta.width / (opts.viewport.width);
+        for (const it of blocks) {
+          const left = Math.max(0, Math.round(it.x * scale)), top = Math.max(0, Math.round(it.y * scale));
+          const width = Math.min(meta.width - left, Math.round(it.w * scale)), height = Math.min(meta.height - top, Math.round(it.h * scale));
+          if (width < 2 || height < 2) continue;
+          const { data } = await sharp(shot).extract({ left, top, width, height }).removeAlpha().raw().toBuffer({ resolveWithObject: true });
+          const lums = [];
+          for (let i = 0; i < data.length; i += 3) lums.push(L(data[i], data[i + 1], data[i + 2]));
+          lums.sort((x, y) => x - y);
+          const [r, g, bb] = it.color.match(/\d+(\.\d+)?/g).map(Number);
+          const lt = L(r, g, bb);
+          const bg = lt > 0.18 ? lums[Math.floor(lums.length * 0.95)] : lums[Math.floor(lums.length * 0.05)];
+          const cr = ratio(lt, bg);
+          const need = it.large ? 3 : 4.5;
+          if (cr < worst.r) worst = { r: cr, where: `${sel}@${p} ${it.tag} "${it.text}"` };
+          if (cr < need) fails.push(`${sel}@${p} ${it.tag} "${it.text}" ${cr.toFixed(2)}:1 < ${need}`);
+        }
+      }
+    }
+    check(`film copy contrast (${label}) ≥ 4.5:1 text / 3:1 headings`, fails.length === 0, fails.length ? fails.slice(0, 4).join(" | ") : `lowest ${worst.r.toFixed(2)}:1 at ${worst.where}`);
+    await c.close();
+    await b.close();
+  }
+}
+
 const failed = results.filter((r) => !r.ok);
 fs.writeFileSync(`${OUT}/results.json`, JSON.stringify(results, null, 2));
 console.log(`\n${results.length - failed.length}/${results.length} checks passed`);
