@@ -146,7 +146,7 @@ const browser = await chromium.launch();
   await page.getByRole("button", { name: "Close 3D view" }).click();
   await page.waitForTimeout(300);
   check("closing viewer returns focus to Rotate button", (await page.evaluate(() => document.activeElement?.textContent?.trim())) === "Rotate object");
-  check("canvas removed after close (no lingering WebGL)", (await page.locator("canvas").count()) === 0);
+  check("canvas removed after close (no lingering WebGL)", (await page.locator(".viewer__canvas").count()) === 0);
 
   check("no console errors / failed requests (desktop flows)", errors.length === 0, errors.slice(0, 5).join(" | "));
   await c.close();
@@ -157,11 +157,10 @@ const browser = await chromium.launch();
   const { c, page, errors } = await ctx(browser, { reducedMotion: "reduce" });
   await page.goto(URL, { waitUntil: "networkidle" });
   await page.waitForTimeout(1500);
-  check("reduced motion: no hero video element", (await page.locator(".hero__video").count()) === 0);
-  check("reduced motion: object section not pinned", (await page.locator(".object--sequence").count()) === 0);
+  check("reduced motion: films shown as stills, no canvas", (await page.locator(".film--static").count()) === 2 && (await page.locator(".film__canvas").count()) === 0);
   check("reduced motion: html data-motion=off", (await page.evaluate(() => document.documentElement.dataset.motion)) === "off");
   await page.locator("#fragrance").scrollIntoViewIfNeeded();
-  const op = await page.locator(".scent__text").first().evaluate((el) => getComputedStyle(el).opacity);
+  const op = await page.locator(".film__copy--static").nth(5).evaluate((el) => getComputedStyle(el).opacity);
   check("reduced motion: content visible without animation", op === "1", `opacity=${op}`);
   check("no console errors (reduced motion)", errors.length === 0, errors.slice(0, 3).join(" | "));
   await c.close();
@@ -206,21 +205,30 @@ await browser.close();
   await b.close();
 }
 
-// ---------------------------------------------------------------- autoplay blocked
+// ---------------------------------------------------------------- scroll films paint frames
 {
-  const b = await chromium.launch({ args: ["--autoplay-policy=document-user-activation-required"] });
+  const b = await chromium.launch();
   const { c, page, errors } = await ctx(b);
   await page.goto(URL, { waitUntil: "networkidle" });
-  await page.waitForTimeout(2500);
-  const st = await page.evaluate(() => {
-    const v = document.querySelector(".hero__video");
-    const img = document.querySelector(".hero__poster img");
-    return { video: !!v, paused: v ? v.paused : null, visible: v ? getComputedStyle(v).opacity : null, poster: img?.complete && img.naturalWidth > 0 };
-  });
-  check("autoplay blocked: poster shown, video hidden", st.poster && (!st.video || st.paused) && (!st.video || st.visible === "0"), JSON.stringify(st));
   const cta = await page.getByRole("link", { name: "Discover No. 01" }).first().isVisible();
-  check("autoplay blocked: CTAs still available", cta);
-  check("no console errors (autoplay blocked)", errors.length === 0, errors.slice(0, 3).join(" | "));
+  check("hero CTAs available on first screen", cta);
+  for (const [sel, f] of [["#top", 0.5], ["#fragrance", 0.3], ["#fragrance", 0.62]]) {
+    await page.evaluate(([s, ff]) => {
+      const el = document.querySelector(s);
+      window.scrollTo({ top: el.getBoundingClientRect().top + scrollY + (el.offsetHeight - innerHeight) * ff, behavior: "instant" });
+    }, [sel, f]);
+    await page.waitForTimeout(1500);
+    const lum = await page.evaluate((s) => {
+      const cv = document.querySelector(`${s} .film__canvas`);
+      const g = cv.getContext("2d");
+      const d = g.getImageData(0, 0, cv.width, cv.height).data;
+      let sum = 0;
+      for (let i = 0; i < d.length; i += 4 * 97) sum += d[i] + d[i + 1] + d[i + 2];
+      return sum / (d.length / (4 * 97)) / 3;
+    }, sel);
+    check(`film ${sel} @${f} paints a frame`, lum > 4, `mean luminance ${lum.toFixed(1)}`);
+  }
+  check("no console errors (films)", errors.length === 0, errors.slice(0, 3).join(" | "));
   await c.close();
   await b.close();
 }

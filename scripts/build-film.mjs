@@ -36,6 +36,10 @@ async function writeFrames(files, dest, { width, height, lift = false, grade = f
 if (which === "reveal") {
   for (const [src, dest, w, h] of [["reveal_desktop", "reveal-d", 1280, 720], ["reveal_mobile", "reveal-m", 576, 1024]]) {
     const dir = path.join(ROOT, "source/frames", src);
+    if (!fs.existsSync(dir)) {
+      console.warn("missing", src);
+      continue;
+    }
     const files = fs.readdirSync(dir).filter((f) => f.endsWith(".png")).sort().map((f) => path.join(dir, f));
     await writeFrames(files, dest, { width: w, height: h, lift: true, quality: 76 });
   }

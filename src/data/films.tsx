@@ -85,7 +85,6 @@ export const REVEAL_CHAPTERS: Chapter[] = [
     from: 0.4,
     to: 0.52,
     still: 0.45,
-    align: "right",
     tone: BRASS,
     children: (
       <>
@@ -114,7 +113,6 @@ export const REVEAL_CHAPTERS: Chapter[] = [
     from: 0.82,
     to: 1,
     still: 0.92,
-    align: "center",
     tone: AMBER,
     children: (
       <>
@@ -131,7 +129,6 @@ export const NOTES_CHAPTERS: Chapter[] = [
     from: 0,
     to: 0.13,
     still: 0.05,
-    align: "center",
     tone: AMBER,
     children: (
       <>
