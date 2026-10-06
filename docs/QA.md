@@ -44,13 +44,13 @@ Lighthouse-like profiles: mobile 390×844 @2x, 150 ms RTT, 1.6 Mbps down, 4× CP
 
 | Metric | Mobile | Desktop |
 | --- | --- | --- |
-| LCP | 1.47 s (`h1`) | 0.74 s (`h1`) |
+| LCP | 1.46 s (`h1`) | 0.30 s (`h1`) |
 | CLS | 0 | 0 |
-| Transferred until `load` | 160 KB | 161 KB |
-| All 120 reveal frames arrived | 9.9 s (1.7 MB transferred by then) | 2.8 s (2.1 MB) |
+| Transferred until `load` | 165 KB | 167 KB |
+| All 120 reveal frames arrived (HD) | 14.5 s (2.7 MB transferred by then) | 3.0 s (3.5 MB) |
 | JS (gzip) | 77 KB initial; three.js viewer chunk only on "Rotate object" | same |
 
-Film weight (WebP): reveal 1.5 MB (mobile) / 1.9 MB (desktop); notes 7.1 MB / 8.7 MB, loaded only when
+Film weight (WebP): reveal 2.5 MB (mobile, 864×1536) / 3.2 MB (desktop, 1920×1080); notes 7.1 MB / 8.7 MB, loaded only when
 the visitor is within two screens of it. On the throttled mobile profile the full notes film needs
 ≈ 36 s; frames load coarse-to-fine (every 32nd first), so fast scrolling shows the nearest loaded frame
 rather than a blank, but early in the visit it can look stepped. This is the main performance cost of
