@@ -6,10 +6,10 @@ iframe**. OBSIDIAN stays a separate, independently deployable project; the 13:33
 ## Short description (EN, ready to paste)
 
 > **OBSIDIAN No. 01** — an original fragrance website concept. Black glass, volcanic stone and amber
-> light, staged like a photographed campaign and built as a working product page: a canonical 3D bottle
-> rendered consistently across every frame, a seamless hero loop, a scroll-led study of the object,
-> three scent chapters, size selection, an interactive 3D view and an accessible demo bag.
-> Fictional brand — concept project by 13:33.
+> light, told as two full-screen films the visitor scrubs with the scroll: the bottle is revealed, opened
+> and sprayed; the droplets become bergamot, iris and amber, and the stone turns into the plinth the
+> bottle returns to. A working product page follows — size selection, an interactive 3D view of the same
+> canonical bottle and an accessible demo bag. Fictional brand — concept project by 13:33.
 
 One-line version: *A cinematic fragrance website concept in dark glass and amber light — concept by 13:33.*
 
@@ -18,20 +18,26 @@ One-line version: *A cinematic fragrance website concept in dark glass and amber
 Concept, art direction, product design of the bottle, 3D modelling and look development, lighting and
 rendering, motion design, frontend engineering, accessibility and performance QA — 13:33.
 
-Production tools: Blender 4.2 (Cycles) for every product image and the hero loop, three.js for the
-interactive viewer, Figma's AI image generation (Gemini 3.1 Flash Image) for the three scent still lifes,
-React + TypeScript + Vite for the site, AI-assisted development with Claude Code.
+Production tools: Blender 4.2 (Cycles) for every product image and the reveal film; Higgsfield
+(Nano Banana Pro still lifes, Kling 3.0 start/end-frame transitions) for the ingredient film, with Figma's
+AI image generation for first drafts; three.js for the interactive viewer; React + TypeScript + Vite for
+the site; AI-assisted development with Claude Code.
 
 ## What works (verifiable in the build)
 
-- Hero with a seamless 6-second rendered loop, matching poster first, deferred video, pause control.
-- One sticky "The Object" sequence on desktop (four authored frames, scroll-linked crossfade).
-- Three editorial scent chapters with a light editorial band.
+- Two full-screen scroll-scrubbed films on a sticky canvas, driven by ordinary page scrolling:
+  - **Reveal** (Blender, 120 frames): hero → the object → cap and brass ring lift away → atomizer →
+    900-droplet amber spray.
+  - **Notes** (Kling 3.0 + Blender, 264 frames): the droplets fall and become bergamot and pepper →
+    daylight turns the slate to travertine, iris and cedar → amber resin and vetiver on volcanic stone →
+    the stone becomes a plinth and the bottle appears on it.
+- Copy in a different colour for each scene, measured for contrast over the actual frames.
+- Separate 16:9 and 9:16 frame sets (composed for each, not cropped); frames stream coarse-to-fine.
 - 50 mL / 100 mL selection with matching bottle print and illustrative prices.
 - Genuine interactive 3D view (drag, keyboard, reset) of the same canonical bottle; omitted without WebGL.
 - Demo bag drawer: modal, keyboard and screen-reader friendly, quantity 1–9, integer-cent subtotal,
   validated local storage. No checkout, no payments, no data collection.
-- Reduced-motion support and an on-page motion pause; designed mobile layouts from 320 px.
+- Reduced motion / "Pause motion": both films become still frames with the same copy.
 
 ## Concept disclosure (must accompany the project)
 
@@ -44,22 +50,23 @@ React + TypeScript + Vite for the site, AI-assisted development with Claude Code
 | --- | --- |
 | `hero/obsidian-hero-2560.jpg`, `hero/obsidian-hero-1600.webp` | Project hero still |
 | `thumbnail/obsidian-thumb-1600x1000.jpg`, `…-800x500.webp` | Project card / grid thumbnail |
-| `screenshots/desktop-*.png` | Real 1440×900 captures of each section |
-| `screenshots/mobile-*.png` | Real 390×844 (@2x) captures |
+| `screenshots/desktop-*.png` | Real 1440×900 captures: every film chapter, product, bag, closing, footer |
+| `screenshots/mobile-*.png` | Real 390×844 (@2x) captures of the same |
 | `reel/obsidian-reel-16x9.mp4` | 18 s website walkthrough, 1920×1080 |
 | `reel/obsidian-reel-9x16.mp4` | 18 s vertical edit from the phone layout, 1080×1920 |
 | `reel/poster-16x9.jpg`, `reel/poster-9x16.jpg` | Posters for the reel `<video>` |
 | `reference/obsidian-no01-reference-sheet.jpg` | Canonical product sheet (front, ¾, side, cap, base) |
 
-### Reel timeline (both edits)
+Hero and thumbnail are the 2560×1440 Blender master of the canonical bottle (the same model as every
+film frame).
 
-| Time | Content (all captured from the live site) |
+### Reel timeline (both edits, one continuous take of the live site)
+
+| Time | Content |
 | --- | --- |
-| 0–3 s | Hero composition with the rendered loop playing |
-| 3–6 s | Scrolling through "The Object" from cap to brass-ring macro (desktop) / object figures (vertical) |
-| 6–9 s | Opening chapter, cut to Heart chapter |
-| 9–12 s | Selecting 100 mL, the print and price change, adding to the demo bag |
-| 12–15 s | Actual phone layout (16:9 edit: centred capture; vertical edit: mobile menu) |
+| 0–6.5 s | Reveal film scrolled from the hero through the cap lift and the atomizer to the spray |
+| 6.5–12.5 s | Notes film: droplets → bergamot → iris → amber → plinth with the bottle |
+| 12.5–15 s | Selecting 100 mL (print and price change), adding to the demo bag |
 | 15–18 s | Closing frame "Presence, distilled." + title card "OBSIDIAN — Concept by 13:33" |
 
 The title card is the only element added in editing; nothing in the reel suggests an interaction the
