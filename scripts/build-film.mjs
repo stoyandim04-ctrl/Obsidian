@@ -33,18 +33,6 @@ async function writeFrames(files, dest, { width, height, lift = false, grade = f
   console.log(dest, files.length, "frames", `${(bytes / 1024 / 1024).toFixed(1)} MB`, `avg ${(bytes / files.length / 1024).toFixed(0)} KB`);
 }
 
-async function appendFrames(files, dest, offset, opts) {
-  const dir = path.join(OUT, dest);
-  for (let i = 0; i < files.length; i++) {
-    const raw = await sharp(files[i]).removeAlpha().toColourspace("srgb").resize({ width: opts.width, height: opts.height, fit: "cover" })
-      .raw({ depth: "uchar" }).toBuffer({ resolveWithObject: true });
-    let img = sharp(raw.data, { raw: raw.info });
-    if (opts.lift) img = img.linear(BG.map((b) => (255 - b) / 255), BG);
-    await img.webp({ quality: opts.quality, effort: 5 }).toFile(path.join(dir, `${String(offset + i).padStart(4, "0")}.webp`));
-  }
-  console.log(dest, "+", files.length, "blend frames");
-}
-
 if (which === "reveal") {
   for (const [src, dest, w, h] of [["reveal_desktop", "reveal-d", 1280, 720], ["reveal_mobile", "reveal-m", 576, 1024]]) {
     const dir = path.join(ROOT, "source/frames", src);
@@ -72,22 +60,34 @@ if (which === "notes") {
       for (const f of fs.readdirSync(seg).sort()) fs.renameSync(path.join(seg, f), path.join(tmp, `${String(n++).padStart(4, "0")}.png`));
       fs.rmSync(seg, { recursive: true });
     }
-    // the bottle appears on the empty plinth: a plain crossfade between two deterministic renders
+    // the bottle appears on the plinth. Everything is mixed in final (graded / lifted) colour space so
+    // there is no step in black level: last generated frame → empty-plinth render → bottle render.
     const suffix = kind === "16x9" ? "plinth_film" : "plinth_film_mobile";
-    const empty = path.join(ROOT, "source/renders/plinth", `${suffix}_empty.png`);
-    const full = path.join(ROOT, "source/renders/plinth", `${suffix}_bottle.png`);
     const BLEND = 24;
-    const base = await sharp(empty).removeAlpha().resize({ width: w, height: h, fit: "cover" }).png().toBuffer();
+    const gen = fs.readdirSync(tmp).filter((f) => f.endsWith(".png")).sort().map((f) => path.join(tmp, f));
+    await writeFrames(gen, dest, { width: w, height: h, grade: true, quality: 80 });
+    const rawOf = async (file, mode) => {
+      let img = sharp(await sharp(file).removeAlpha().toColourspace("srgb").resize({ width: w, height: h, fit: "cover" }).raw({ depth: "uchar" }).toBuffer(), { raw: { width: w, height: h, channels: 3 } });
+      if (mode === "grade") img = img.modulate({ saturation: 0.9, brightness: 0.98 }).linear([1.02, 1.0, 0.96], [0, 0, 0]);
+      else img = img.linear(BG.map((b) => (255 - b) / 255), BG);
+      return img.raw().toBuffer();
+    };
+    const last = await rawOf(gen[gen.length - 1], "grade");
+    const empty = await rawOf(path.join(ROOT, "source/renders/plinth", `${suffix}_empty.png`), "lift");
+    const full = await rawOf(path.join(ROOT, "source/renders/plinth", `${suffix}_bottle.png`), "lift");
+    const ease = (x) => { const u = Math.min(1, Math.max(0, x)); return u * u * (3 - 2 * u); };
+    const out = Buffer.alloc(w * h * 3);
     for (let k = 1; k <= BLEND; k++) {
       const a = k / BLEND;
-      const eased = a * a * (3 - 2 * a);
-      const top = await sharp(full).removeAlpha().resize({ width: w, height: h, fit: "cover" }).ensureAlpha(eased).png().toBuffer();
-      await sharp(base).composite([{ input: top }]).png().toFile(path.join(tmp, `${String(n++).padStart(4, "0")}.png`));
+      const e = ease(a / 0.3); // generated frame → empty render over the first ~7 frames
+      const b = ease((a - 0.2) / 0.8); // bottle fades in over the rest
+      for (let i = 0; i < out.length; i++) {
+        const plate = last[i] + (empty[i] - last[i]) * e;
+        out[i] = Math.round(plate + (full[i] - plate) * b);
+      }
+      await sharp(out, { raw: { width: w, height: h, channels: 3 } }).webp({ quality: 80, effort: 5 })
+        .toFile(path.join(OUT, dest, `${String(gen.length + k - 1).padStart(4, "0")}.webp`));
     }
-    const files = fs.readdirSync(tmp).filter((f) => f.endsWith(".png")).sort().map((f) => path.join(tmp, f));
-    // generated frames get the scent grade; the last BLEND frames are renders and get the black lift instead
-    const gen = files.slice(0, files.length - BLEND);
-    await writeFrames(gen, dest, { width: w, height: h, grade: true, quality: 80 });
-    await appendFrames(files.slice(files.length - BLEND), dest, gen.length, { width: w, height: h, lift: true, quality: 80 });
+    console.log(dest, "+", BLEND, "blend frames");
   }
 }
