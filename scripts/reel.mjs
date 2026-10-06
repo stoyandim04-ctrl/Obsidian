@@ -1,7 +1,7 @@
 /**
  * 18-second website reel captured from the real site: both scroll films played by ordinary page scrolling,
  * then the real size selector and demo bag (no added fake interactions).
- *   node scripts/reel.mjs http://127.0.0.1:4173/ [desktop|mobile|both]
+ *   node scripts/reel.mjs http://127.0.0.1:4173/ [desktop|mobile|both|retitle]
  * Frames come from the Chrome DevTools screencast, are timed with their own timestamps and
  * assembled into constant-frame-rate H.264 with ffmpeg. Output: portfolio/reel/.
  */
@@ -74,15 +74,17 @@ function concatWithTitle(clips, size, out) {
   fs.writeFileSync(list, clips.map((c) => `file '${c}'`).join("\n"));
   const big = Math.round(size.h * (size.w > size.h ? 0.075 : 0.042));
   const small = Math.round(big * 0.3);
-  const cx = size.w > size.h ? "w*0.08" : "(w-text_w)/2";
-  const yTitle = size.w > size.h ? "h*0.40" : "h*0.15";
-  const ySub = size.w > size.h ? `h*0.40+${Math.round(big * 1.35)}` : `h*0.15+${Math.round(big * 1.35)}`;
-  // Title card over the closing scene only (last 3 s): 15.4 s → 18 s
+  const yTitle = `(h-${Math.round(big * 1.9)})/2`;
+  const ySub = `(h-${Math.round(big * 1.9)})/2+${Math.round(big * 1.35)}`;
+  // Title card over the closing scene only: the page dims to 10 % behind it from 15.2 s, so the
+  // card never sits on top of the site's own headline.
   const vf = [
-    `drawtext=fontfile='${SERIF}':text='OBSIDIAN':fontcolor=0xF2EEE7:fontsize=${big}:x=${cx}:y=${yTitle}:alpha='if(lt(t,15.4),0,min(1,(t-15.4)/0.6))'`,
-    `drawtext=fontfile='${SANS}':text='CONCEPT BY 13\\:33':fontcolor=0xB89261:fontsize=${small}:x=${cx}:y=${ySub}:alpha='if(lt(t,15.7),0,min(1,(t-15.7)/0.6))'`,
-  ].join(",");
-  execFileSync("ffmpeg", ["-y", "-v", "error", "-f", "concat", "-safe", "0", "-i", list, "-vf", vf,
+    `color=c=0x0B0C0E:s=${size.w}x${size.h}:d=18,format=rgba,fade=in:st=15.2:d=0.6:alpha=1,colorchannelmixer=aa=0.9[shade]`,
+    `[0:v][shade]overlay=shortest=1,` +
+      `drawtext=fontfile='${SERIF}':text='OBSIDIAN':fontcolor=0xF2EEE7:fontsize=${big}:x=(w-text_w)/2:y=${yTitle}:alpha='if(lt(t,15.5),0,min(1,(t-15.5)/0.6))',` +
+      `drawtext=fontfile='${SANS}':text='CONCEPT BY 13\\:33':fontcolor=0xB89261:fontsize=${small}:x=(w-text_w)/2:y=${ySub}:alpha='if(lt(t,15.8),0,min(1,(t-15.8)/0.6))'`,
+  ].join(";");
+  execFileSync("ffmpeg", ["-y", "-v", "error", "-f", "concat", "-safe", "0", "-i", list, "-filter_complex", vf,
     "-c:v", "libx264", "-preset", "slow", "-crf", "18", "-pix_fmt", "yuv420p", "-movflags", "+faststart", "-an", out]);
   console.log("wrote", out);
 }
@@ -113,6 +115,14 @@ async function take(viewport, dpr, mobile, size, prefix) {
   clips.push(await record(page, cdp, `${prefix}4-closing`, 3000, size));
   await ctx.close();
   return clips;
+}
+
+// re-cut the title card from the last recorded clips without recording again
+if (which === "retitle") {
+  const clips = (p) => ["1-reveal", "2-notes", "3-product", "4-closing"].map((c) => path.join(TMP, `${p}${c}.mp4`));
+  if (fs.existsSync(clips("d")[3])) concatWithTitle(clips("d"), { w: 1920, h: 1080 }, path.join(OUT, "obsidian-reel-16x9.mp4"));
+  if (fs.existsSync(clips("m")[3])) concatWithTitle(clips("m"), { w: 1080, h: 1920 }, path.join(OUT, "obsidian-reel-9x16.mp4"));
+  process.exit(0);
 }
 
 const browser = await chromium.launch();
