@@ -38,10 +38,9 @@ Optional: add a custom domain in the project settings (not bought here).
 
 ## Known limitations / next steps
 
-- **Reveal film resolution.** The live frames are 1280×720 (desktop) and 576×1024 (mobile) at 24
-  samples; an HD pass (1920×1080 / 864×1536, 32 samples) was started with
-  `source/scripts/render_reveal_hd.sh`. When it completes, `node scripts/build-film.mjs reveal` picks
-  it up (see the script) — rebuild and redeploy.
+- **Reveal film resolution.** Desktop now uses the HD pass (1920×1080, 32 samples). Mobile is still
+  576×1024 until its HD pass (864×1536) finishes; `node scripts/build-film.mjs reveal` picks it up
+  automatically, then update the mobile size in `src/data/films.tsx`, rebuild and push.
 - **Generated transitions are interpretive** (morphs between still lifes), checked frame by frame but not
   physically accurate.
 - **Rights** for Higgsfield / Figma outputs are not independently verified for commercial use

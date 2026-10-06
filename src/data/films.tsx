@@ -7,7 +7,7 @@ import type { Chapter, FilmSource } from "../components/ScrollFilm";
 import { MotionPreferenceControls } from "../components/MotionPreferenceControls";
 
 export const REVEAL = {
-  desktop: { dir: "reveal-d", count: 120, width: 1280, height: 720 } satisfies FilmSource,
+  desktop: { dir: "reveal-d", count: 120, width: 1920, height: 1080 } satisfies FilmSource,
   mobile: { dir: "reveal-m", count: 120, width: 576, height: 1024 } satisfies FilmSource,
 };
 

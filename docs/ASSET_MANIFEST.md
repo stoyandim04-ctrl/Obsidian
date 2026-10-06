@@ -22,7 +22,8 @@ and Hanken Grotesk (SIL OFL 1.1, embedding in images permitted).
 | `closing_mobile.png`, `closing_mobile_b.png` | `closing_mobile[_b]` | 1200×1500 | 160 | `closing-mobile[-b]-{600,900,1200}` |
 | `ref_front/three_quarter/side.png`, `object_o1/o3.png` | `ref_*`, `object_o1/o3` | 1200×1500 / 1440×1800 | 128–160 | `portfolio/reference/obsidian-no01-reference-sheet.jpg` |
 | `hero_desktop.png` | `hero_desktop` | 2560×1440 | 160 | `public/og-image.jpg` (no longer on the page) |
-| `source/frames/reveal_desktop/f0000–f0238.png` (even) | `reveal` | 1280×720 | 24 + OIDN | `public/media/film/reveal-d/0000–0119.webp` (1280×720) |
+| `source/frames/reveal_desktop_hd/f0000–f0238.png` (even) | `reveal --scale 1.5` | 1920×1080 | 32 + OIDN | `public/media/film/reveal-d/0000–0119.webp` (1920×1080) |
+| `source/frames/reveal_desktop/f0000–f0238.png` (even) | `reveal` | 1280×720 | 24 + OIDN | superseded by the HD pass (kept as the T0 source; see endframes) |
 | `source/frames/reveal_mobile/f0000–f0238.png` (even) | `reveal_mobile` | 576×1024 | 24 + OIDN | `public/media/film/reveal-m/0000–0119.webp` (576×1024) |
 | `source/frames/endframes/{desktop,mobile}/f0239.png` | `reveal` / `reveal_mobile`, last frame | 1280×720 / 576×1024 | 24 | uploaded to Higgsfield as T0 start frames |
 | `source/renders/plinth/plinth_film[_mobile]_{empty,bottle}.png` | `plinth_film[_mobile]` (`--no-bottle` for empty) | 1600×900 / 720×1280 | 96 | notes frames 240–263; the empty plinth was uploaded as T3 end frame |
