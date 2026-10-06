@@ -1,0 +1,228 @@
+.film {
+  position: relative;
+  --film-text: var(--text);
+  --film-accent: var(--accent);
+  --film-muted: var(--muted);
+}
+
+.film__anchor {
+  position: absolute;
+  left: 0;
+  width: 1px;
+  height: 1px;
+}
+
+.film__stage {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+.film__poster,
+.film__canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* quiet the side the copy sits on, so text stays readable over any frame */
+.film__shade {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 500ms var(--ease), background 500ms var(--ease);
+  background: linear-gradient(90deg, rgb(11 12 14 / 0.6) 0%, rgb(11 12 14 / 0) 46%);
+}
+
+.film__shade--dark {
+  opacity: 1;
+}
+
+.film__shade--light {
+  opacity: 1;
+  background: linear-gradient(90deg, rgb(233 225 212 / 0.75) 0%, rgb(233 225 212 / 0) 46%);
+}
+
+.film__copy {
+  position: absolute;
+  z-index: 2;
+  inset: auto var(--gutter) clamp(32px, 8svh, 96px);
+  display: grid;
+  gap: var(--s3);
+  max-width: 640px;
+  color: var(--film-text);
+  will-change: opacity, transform;
+}
+
+.film__copy--right {
+  left: auto;
+  text-align: right;
+  justify-items: end;
+}
+
+.film__copy--center {
+  left: 50%;
+  right: auto;
+  width: min(100% - 2 * var(--gutter), 900px);
+  transform-origin: center;
+  translate: -50% 0;
+  text-align: center;
+  justify-items: center;
+}
+
+.film__copy .label {
+  color: var(--film-accent);
+}
+
+.film__copy .lead,
+.film__copy p {
+  color: var(--film-muted);
+}
+
+.film__copy .display,
+.film__copy .h2,
+.film__copy .h3 {
+  color: var(--film-text);
+  text-wrap: balance;
+}
+
+.film__notes {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--film-accent) !important;
+}
+
+@media (min-width: 900px) {
+  .film__copy {
+    left: max(var(--gutter), calc((100vw - var(--maxw)) / 2 + var(--gutter)));
+    bottom: auto;
+    top: 50%;
+    translate: 0 -50%;
+  }
+  .film__copy--right {
+    left: auto;
+    right: max(var(--gutter), calc((100vw - var(--maxw)) / 2 + var(--gutter)));
+  }
+  .film__copy--center {
+    left: 50%;
+    translate: -50% -50%;
+  }
+}
+
+/* portrait: copy in the quiet upper area of the 9:16 frames */
+@media (max-aspect-ratio: 1/1) {
+  .film__copy {
+    inset: calc(var(--header-h) + 16px) var(--gutter) auto;
+    max-width: none;
+  }
+  .film__copy--right {
+    text-align: left;
+    justify-items: start;
+  }
+  .film__copy--center {
+    translate: none;
+    left: var(--gutter);
+    width: auto;
+  }
+  .film__shade {
+    background: linear-gradient(180deg, rgb(11 12 14 / 0.75) 0%, rgb(11 12 14 / 0) 48%);
+  }
+  .film__shade--light {
+    background: linear-gradient(180deg, rgb(233 225 212 / 0.8) 0%, rgb(233 225 212 / 0) 48%);
+  }
+}
+
+/* ---------- motion off: still frames in normal flow ---------- */
+.film--static .film__still {
+  position: relative;
+  display: grid;
+}
+
+.film--static .film__still img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+}
+
+.film--static .film__copy--static {
+  position: static;
+  translate: none;
+  transform: none;
+  max-width: 44rem;
+  padding: var(--s5) var(--gutter) var(--s8);
+  margin-inline: auto;
+  width: 100%;
+  text-align: left;
+  justify-items: start;
+  color: var(--text);
+}
+
+.film--static .film__copy--static .display,
+.film--static .film__copy--static .h2 {
+  color: var(--text);
+}
+
+@media (max-aspect-ratio: 1/1) {
+  .film--static .film__still img {
+    aspect-ratio: 9 / 16;
+    max-height: 80svh;
+  }
+}
+
+.film--static .film__copy .label,
+.film--static .film__notes {
+  color: var(--accent) !important;
+}
+
+.film--static .film__copy p,
+.film--static .film__copy .lead {
+  color: var(--muted);
+}
+
+/* hero chapter: headline block + actions; on portrait the actions sit on the dark floor */
+.film__copy--hero {
+  max-width: min(46%, 700px);
+}
+
+.film__hero-actions {
+  display: grid;
+  gap: var(--s2);
+  justify-items: start;
+}
+
+.film__hero-actions .hero__ctas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s2) var(--s3);
+}
+
+.film__hero-foot {
+  display: flex;
+  align-items: center;
+  gap: var(--s4);
+}
+
+@media (max-aspect-ratio: 1/1) {
+  .film__copy--hero {
+    inset: calc(var(--header-h) + 16px) var(--gutter) 20px;
+    max-width: none;
+    align-content: space-between;
+  }
+  .film__hero-actions {
+    justify-items: stretch;
+  }
+  .film__hero-actions .hero__ctas > .btn {
+    flex: 1 1 100%;
+  }
+  .film__hero-foot {
+    justify-content: space-between;
+  }
+}

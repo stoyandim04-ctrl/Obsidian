@@ -1,8 +1,7 @@
 import { useCallback, useRef, useState, useSyncExternalStore } from "react";
 import { SiteHeader } from "./components/SiteHeader";
-import { HeroScene } from "./components/HeroScene";
-import { ObjectStudy } from "./components/ObjectStudy";
-import { ScentChapters } from "./components/ScentChapters";
+import { ScrollFilm } from "./components/ScrollFilm";
+import { NOTES, NOTES_CHAPTERS, NOTES_REMAP, REVEAL, REVEAL_CHAPTERS } from "./data/films";
 import { ProductSelection } from "./components/ProductSelection";
 import { ClosingScene } from "./components/ClosingScene";
 import { SiteFooter } from "./components/SiteFooter";
@@ -64,9 +63,25 @@ export default function App() {
       </a>
       <SiteHeader bagCount={count} onOpenBag={() => openBag(bagButton.current)} bagButtonRef={bagButton} />
       <main id="main" tabIndex={-1}>
-        <HeroScene />
-        <ObjectStudy />
-        <ScentChapters />
+        <ScrollFilm
+          id="top"
+          label="OBSIDIAN No. 01 — the object: the bottle turns, the cap lifts, the atomizer releases a mist of amber droplets."
+          desktop={REVEAL.desktop}
+          mobile={REVEAL.mobile}
+          length={6}
+          chapters={REVEAL_CHAPTERS}
+          anchors={[{ id: "object", at: 0.2 }]}
+          priority
+        />
+        <ScrollFilm
+          id="fragrance"
+          label="The fragrance in three acts: droplets fall and become bergamot and pepper, then iris and cedarwood, then amber resin and vetiver."
+          desktop={NOTES.desktop}
+          mobile={NOTES.mobile}
+          length={7}
+          chapters={NOTES_CHAPTERS}
+          remap={NOTES_REMAP}
+        />
         <ProductSelection onAdd={onAdd} />
         <ClosingScene />
       </main>

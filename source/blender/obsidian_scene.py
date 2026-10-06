@@ -149,6 +149,27 @@ def mat_brass():
     return m
 
 
+def mat_metal_dark():
+    m, nt, out = node_mat("DarkMetal")
+    b = nt.nodes.new("ShaderNodeBsdfPrincipled")
+    b.inputs["Base Color"].default_value = (0.05, 0.045, 0.04, 1)
+    b.inputs["Metallic"].default_value = 1.0
+    b.inputs["Roughness"].default_value = 0.32
+    nt.links.new(b.outputs["BSDF"], out.inputs["Surface"])
+    return m
+
+
+def mat_droplet():
+    m, nt, out = node_mat("Droplet")
+    b = nt.nodes.new("ShaderNodeBsdfPrincipled")
+    b.inputs["Base Color"].default_value = (1.0, 0.78, 0.5, 1)
+    b.inputs["Transmission Weight"].default_value = 1.0
+    b.inputs["Roughness"].default_value = 0.0
+    b.inputs["IOR"].default_value = 1.36
+    nt.links.new(b.outputs["BSDF"], out.inputs["Surface"])
+    return m
+
+
 def mat_print(size_ml):
     m, nt, out = node_mat(f"Print{size_ml}")
     tex = nt.nodes.new("ShaderNodeTexImage")
@@ -306,6 +327,24 @@ def build_bottle(size_ml="50"):
     smooth(cap, 40)
     cap.data.materials.append(mat_cap())
 
+    # atomizer under the cap (hidden inside the solid cap when closed; revealed when it lifts)
+    collar = cylinder("PumpCollar", NECK_R + 0.006, 0.024, BODY_H + NECK_H, verts=96)
+    smooth(collar, 40)
+    collar.data.materials.append(mat_metal_dark())
+    actuator = cylinder("Actuator", 0.072, 0.075, BODY_H + NECK_H + 0.024, verts=96)
+    ab = actuator.modifiers.new("b", "BEVEL")
+    ab.width = 0.008
+    ab.segments = 3
+    bpy.context.view_layer.objects.active = actuator
+    bpy.ops.object.modifier_apply(modifier=ab.name)
+    smooth(actuator, 40)
+    actuator.data.materials.append(mat_brass())
+    bpy.ops.mesh.primitive_cylinder_add(vertices=32, radius=0.011, depth=0.012,
+                                        location=(0, -0.072, BODY_H + NECK_H + 0.062), rotation=(math.radians(90), 0, 0))
+    nozzle = bpy.context.active_object
+    nozzle.name = "Nozzle"
+    nozzle.data.materials.append(mat_surface("NozzleHole", (0.0, 0.0, 0.0), 0.6, 0.2))
+
     # front print: plane hugging the flat front face, a hair outside the glass
     face_w, z0, z1 = 0.84, 0.08, 1.37
     bpy.ops.mesh.primitive_plane_add(size=1, location=(0, -BODY_D / 2 - 0.0006, (z0 + z1) / 2),
@@ -317,7 +356,7 @@ def build_bottle(size_ml="50"):
     label.data.materials.append(mat_print(size_ml))
     label.visible_shadow = False
 
-    for ob in (glass, liquid, ring, cap, label):
+    for ob in (glass, liquid, ring, cap, label, collar, actuator, nozzle):
         ob.parent = root
     return root
 
@@ -680,6 +719,22 @@ def shot(name, size_ml="50"):
         place_orbit(cam, t, dist, 0, 5)
         S.update(w=w, h=h, samples=160)
 
+    elif name in ("reveal", "reveal_mobile"):
+        # Scroll-scrubbed hero/object sequence. Frame 0 == hero poster composition.
+        lights = studio()
+        bottle.rotation_euler.z = math.radians(-12)
+        cam = camera(lens=85)
+        mobile = name == "reveal_mobile"
+        w, h = (576, 1024) if mobile else (1280, 720)
+        sensor_h = 36 if mobile else 36 * h / w
+        dist = frame_distance(85, sensor_h, 1.90, 0.40 if mobile else 0.66)
+        parts = [bpy.data.objects["Cap"], bpy.data.objects["BrassRing"]]  # the ring is part of the cap
+        base_z = [o.location.z for o in parts]
+        drops = make_droplets()
+        S.update(w=w, h=h, samples=24)
+        S["anim"] = lambda f, n: reveal_motion(cam, lights, parts, base_z, dist, mobile, f / (n - 1), drops)
+        place_orbit(cam, target, dist, 0, 3.5)
+
     elif name == "turntable":
         lights = studio()
         cam = camera(lens=85)
@@ -721,6 +776,122 @@ def shot(name, size_ml="50"):
     return S
 
 
+def keyed(t, keys):
+    """Piecewise smoothstep through (t, value) keys: eases into and out of every key (natural holds)."""
+    if t <= keys[0][0]:
+        return keys[0][1]
+    for (t0, v0), (t1, v1) in zip(keys, keys[1:]):
+        if t <= t1:
+            u = (t - t0) / (t1 - t0) if t1 > t0 else 1.0
+            u = u * u * (3 - 2 * u)
+            return v0 + (v1 - v0) * u
+    return keys[-1][1]
+
+
+REVEAL = {
+    # Chapter holds (the page overlays its copy here): 0 hero · 0.25 object · 0.45 cap lifted ·
+    # 0.6 atomizer · 0.62–1.0 spray, camera pushes into the droplets.
+    "az": [(0, 0), (0.25, -22), (0.45, -30), (0.6, -30), (1.0, -17)],
+    "dist": [(0, 1.0), (0.25, 0.82), (0.45, 0.56), (0.6, 0.34), (0.85, 0.27), (1.0, 0.13)],
+    "tz": [(0, 0.95), (0.25, 1.0), (0.45, 1.84), (0.6, 1.64), (1.0, 1.62)],
+    "el": [(0, 3.5), (0.25, 5.0), (0.45, 4.5), (0.6, 2.0), (1.0, 1.0)],
+    "shift_x": [(0, -0.19), (0.25, -0.12), (0.45, 0.0), (0.6, -0.08), (1.0, 0.0)],
+    "shift_y_mobile": [(0, 0.10), (0.25, 0.06), (0.45, 0.0), (0.6, -0.06), (0.86, -0.04), (1.0, 0.72)],
+    "shift_y": [(0, 0.017), (0.86, 0.017), (1.0, 0.5)],
+    "cap": [(0, 0), (0.3, 0), (0.45, 0.42), (0.6, 1.6), (1.0, 1.6)],
+    "sweep": [(0, -35), (0.25, -5), (0.45, 25), (0.6, -20), (1.0, -45)],
+    "spray": [(0.62, 0.0), (1.0, 1.0)],
+}
+SPRAY_START = 0.62
+
+
+def make_droplets(n=900, seed=7):
+    """Deterministic droplet field: each droplet has a launch time, direction in a cone, travel and size."""
+    import random
+
+    rnd = random.Random(seed)
+    bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=3, radius=1.0)
+    proto = bpy.context.active_object
+    proto.name = "DropletProto"
+    proto.data.materials.append(mat_droplet())
+    bpy.ops.object.shade_smooth()
+    proto.hide_render = True
+    drops = []
+    for i in range(n):
+        ob = bpy.data.objects.new(f"Drop{i}", proto.data)
+        bpy.context.collection.objects.link(ob)
+        u, v = rnd.random(), rnd.random()
+        spread = math.radians(14) * math.sqrt(u)
+        phi = 2 * math.pi * v
+        drops.append({
+            "ob": ob,
+            "t0": rnd.random() * 0.55,                   # launch, in spray-normalised time
+            "spread": (math.cos(phi) * spread, math.sin(phi) * spread * 0.7),
+            "travel": 1.2 + rnd.random() * 4.5,
+            "size": 0.0018 + rnd.random() ** 4 * 0.009,
+        })
+        ob.scale = (0, 0, 0)
+    return drops
+
+
+def place_droplets(drops, tau):
+    """Ballistic spray from the nozzle along the bottle's front axis (yaw −12°), with drag and a little gravity."""
+    yaw = math.radians(-12)
+    # nozzle at local (0, -0.078, 1.612) rotated by the bottle yaw
+    nozzle = Vector((0.078 * math.sin(yaw), -0.078 * math.cos(yaw), BODY_H + NECK_H + 0.062))
+    base_dir = Vector((math.sin(yaw), -math.cos(yaw), 0.04))
+    side = Vector((math.cos(yaw), math.sin(yaw), 0))
+    up = Vector((0, 0, 1))
+    for d in drops:
+        age = tau - d["t0"]
+        ob = d["ob"]
+        if age <= 0:
+            ob.scale = (0, 0, 0)
+            continue
+        dirv = (base_dir + side * math.tan(d["spread"][0]) + up * math.tan(d["spread"][1])).normalized()
+        k = 3.2
+        dist = d["travel"] * (1 - math.exp(-k * age))
+        pos = nozzle + dirv * dist + Vector((0, 0, -0.18 * age * age))
+        ob.location = pos
+        grow = min(1.0, age * 6)
+        r = d["size"] * (0.35 + 0.65 * grow)
+        # stretch slightly along travel while fast (cheap motion streak)
+        speed = d["travel"] * k * math.exp(-k * age)
+        ob.rotation_euler = dirv.to_track_quat("Z", "Y").to_euler()
+        ob.scale = (r, r, r * (1 + min(1.6, speed * 0.25)))
+
+
+def reveal_motion(cam, lights, parts, base_z, dist, mobile, t, drops=None):
+    R = REVEAL
+    target = (0, 0, keyed(t, R["tz"]))
+    place_orbit(cam, target, dist * keyed(t, R["dist"]), keyed(t, R["az"]), keyed(t, R["el"]))
+    if mobile:
+        cam.data.shift_x = 0
+        cam.data.shift_y = keyed(t, R["shift_y_mobile"])
+    else:
+        cam.data.shift_x = keyed(t, R["shift_x"])
+        cam.data.shift_y = keyed(t, R["shift_y"])
+    lift = keyed(t, R["cap"])
+    for o, z in zip(parts, base_z):
+        o.location.z = z + lift
+    a = math.radians(keyed(t, R["sweep"]))
+    sw = lights["sweep"]
+    sw.location = (math.sin(a) * 2.6, -math.cos(a) * 2.6, 2.3)
+    aim(sw, (0, 0, 1.4 + min(lift, 0.4) * 0.6))
+    pl = bpy.data.objects.get("PrintLight")
+    if pl is not None:
+        pl.location = cam.location + Vector((-0.6, 0, 1.2)) * keyed(t, R["dist"])
+        aim(pl, bpy.data.objects["FrontPrint"].matrix_world.translation)
+    if drops is not None:
+        tau = max(0.0, (t - SPRAY_START) / (1 - SPRAY_START))
+        place_droplets(drops, tau)
+    # shallow focus once the camera is close to the atomizer
+    if t > 0.5:
+        cam.data.dof.use_dof = True
+        cam.data.dof.focus_distance = (Vector(target) - cam.location).length
+        cam.data.dof.aperture_fstop = 3.5
+
+
 def hero_motion(cam, lights, target, dist, f, n):
     """Seamless 6 s loop: gentle push-in (2.5 %) + 4 deg arc + highlight travelling
     across the shoulder; all channels return to the start pose at f == n."""
@@ -745,6 +916,7 @@ def main():
     ap.add_argument("--samples", type=int, default=0)
     ap.add_argument("--frames", default="", help="a:b frame range for animated shots (n = 144)")
     ap.add_argument("--nframes", type=int, default=144)
+    ap.add_argument("--step", type=int, default=1, help="render every Nth frame of the range")
     ap.add_argument("--save-blend", default="")
     a = ap.parse_args(argv)
 
@@ -756,7 +928,7 @@ def main():
     if "anim" in S and a.frames:
         f0, f1 = (int(x) for x in a.frames.split(":"))
         os.makedirs(a.out, exist_ok=True)
-        for f in range(f0, f1):
+        for f in range(f0, f1, a.step):
             path = os.path.join(a.out, f"f{f:04d}.png")
             if os.path.exists(path):
                 continue

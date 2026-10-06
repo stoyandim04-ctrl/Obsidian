@@ -42,38 +42,3 @@ const euro = new Intl.NumberFormat("en-IE", {
 export function formatPrice(cents: number): string {
   return euro.format(cents / 100);
 }
-
-export const SCENT_CHAPTERS = [
-  {
-    id: "opening",
-    act: "Opening",
-    title: "The first spark.",
-    notes: "Bergamot · Black pepper",
-    body: "Bright citrus meets a dry, sharp edge.",
-    image: "scent-opening",
-    alt: "A curl of bergamot peel and a few black peppercorns on dark volcanic stone in warm raking light.",
-    tone: "dark",
-  },
-  {
-    id: "heart",
-    act: "Heart",
-    title: "The quiet centre.",
-    notes: "Iris · Cedarwood",
-    body: "Soft floral texture, grounded in wood.",
-    image: "scent-heart",
-    alt: "A pale iris petal beside a curled cedarwood shaving on warm ivory stone in soft window light.",
-    tone: "light",
-  },
-  {
-    id: "base",
-    act: "Base",
-    title: "What remains.",
-    notes: "Amber accord · Vetiver",
-    body: "Warmth and earthy depth close the composition.",
-    image: "scent-base",
-    alt: "Warm light glowing through a piece of amber-coloured resin beside dry vetiver roots on dark stone.",
-    tone: "dark",
-    /** Decorative light-movement loop (desktop, motion on, in view only). */
-    video: "scent-base-loop",
-  },
-] as const;

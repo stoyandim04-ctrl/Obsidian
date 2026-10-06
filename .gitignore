@@ -14,3 +14,4 @@ source/fonts/*
 qa-artifacts/
 __pycache__/
 artifact/
+source/generated/*.mp4
