@@ -38,7 +38,7 @@ export const NOTES_REMAP: [number, number][] = [
 const BRASS = { text: "#F2EEE7", accent: "#B89261", muted: "#B9B2A8" };
 const AMBER = { text: "#F7EBDA", accent: "#E3A04B", muted: "#D2C2AD" };
 const CITRUS = { text: "#F4F1E4", accent: "#D9D27C", muted: "#C3BFA8" };
-const IRIS = { text: "#1D1922", accent: "#6F5C8E", muted: "#4C4455", shade: "light" as const };
+const IRIS = { text: "#1D1922", accent: "#55466F", muted: "#4C4455", shade: "light" as const };
 
 export const REVEAL_CHAPTERS: Chapter[] = [
   {

@@ -4,8 +4,9 @@
  * Profiles mirror Lighthouse's defaults:
  *   mobile  — 390×844 @2x, RTT 150 ms, 1.6 Mbps down / 0.75 Mbps up, CPU 4× slowdown
  *   desktop — 1440×900 @1x, RTT 40 ms, 10 Mbps down / 10 Mbps up, no CPU slowdown
- * Reports LCP (element + time), CLS, and bytes transferred until the load event and after
- * the deferred hero video starts (cache disabled, fresh context per run).
+ * Reports LCP (element + time), CLS, bytes transferred until the load event, the time until every
+ * frame of the first scroll film has arrived, and bytes after one pass through the page
+ * (cache disabled, fresh context per run).
  */
 import { chromium } from "playwright";
 import fs from "node:fs";
@@ -59,7 +60,14 @@ for (const [name, p] of Object.entries(PROFILES)) {
     });
     await page.goto(URL, { waitUntil: "load" });
     bytesAtLoad = bytes;
-    await page.waitForTimeout(6000); // let deferred media start
+    // time until all 120 frames of the reveal film have arrived (scrubbing then never waits)
+    const t0 = Date.now();
+    const revealMs = await page
+      .waitForFunction(() => performance.getEntriesByType("resource").filter((e) => /\/film\/reveal-[dm]\//.test(e.name)).length >= 120, null, { timeout: 90000, polling: 250 })
+      .then(() => page.evaluate(() => Math.round(Math.max(...performance.getEntriesByType("resource").filter((e) => /\/film\/reveal-[dm]\//.test(e.name)).map((e) => e.responseEnd)))))
+      .catch(() => -1);
+    const kbAtReveal = Math.round(bytes / 1024);
+    if (Date.now() - t0 < 2000) await page.waitForTimeout(2000);
     // scroll the page once to collect layout shifts from lazy content
     const h = await page.evaluate(() => document.documentElement.scrollHeight);
     for (let y = 0; y < h; y += p.viewport.height) {
@@ -67,13 +75,20 @@ for (const [name, p] of Object.entries(PROFILES)) {
       await page.waitForTimeout(150);
     }
     const r = await page.evaluate(() => ({ lcp: window.__lcp, cls: window.__cls }));
-    runs.push({ lcp: Math.round(r.lcp.t), lcpEl: r.lcp.el, cls: Number(r.cls.toFixed(4)), kbAtLoad: Math.round(bytesAtLoad / 1024), kbTotalAfterScroll: Math.round(bytes / 1024), byTypeKB: Object.fromEntries(Object.entries(byType).map(([k, v]) => [k, Math.round(v / 1024)])) });
+    runs.push({ lcp: Math.round(r.lcp.t), lcpEl: r.lcp.el, cls: Number(r.cls.toFixed(4)), kbAtLoad: Math.round(bytesAtLoad / 1024), revealAllFramesMs: revealMs, kbAtReveal, kbTotalAfterScroll: Math.round(bytes / 1024), byTypeKB: Object.fromEntries(Object.entries(byType).map(([k, v]) => [k, Math.round(v / 1024)])) });
     await ctx.close();
   }
   out[name] = {
     profile: p,
     runs,
-    median: { lcp: median(runs.map((r) => r.lcp)), cls: median(runs.map((r) => r.cls)), kbAtLoad: median(runs.map((r) => r.kbAtLoad)) },
+    median: {
+      lcp: median(runs.map((r) => r.lcp)),
+      cls: median(runs.map((r) => r.cls)),
+      kbAtLoad: median(runs.map((r) => r.kbAtLoad)),
+      revealAllFramesMs: median(runs.map((r) => r.revealAllFramesMs)),
+      kbAtReveal: median(runs.map((r) => r.kbAtReveal)),
+      kbTotalAfterScroll: median(runs.map((r) => r.kbTotalAfterScroll)),
+    },
   };
   console.log(name, JSON.stringify(out[name].median), "LCP element:", runs[0].lcpEl);
 }

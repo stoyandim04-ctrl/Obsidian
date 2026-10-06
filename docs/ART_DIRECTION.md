@@ -117,5 +117,5 @@ No bottle, no text, no logos in generated media — the product only ever comes 
 | --- | --- | --- |
 | Reveal, Return | `#F2EEE7` / `#B89261` / `#B9B2A8` | dark |
 | Opening (bergamot) | `#F4F1E4` / `#D9D27C` / `#C3BFA8` | dark |
-| Heart (iris, light travertine) | `#1D1922` / `#6F5C8E` / `#4C4455` | light |
+| Heart (iris, light travertine) | `#1D1922` / `#55466F` / `#4C4455` | light |
 | Base (amber) | `#F7EBDA` / `#E3A04B` / `#D2C2AD` | dark |

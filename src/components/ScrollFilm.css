@@ -132,10 +132,10 @@
     width: auto;
   }
   .film__shade {
-    background: linear-gradient(180deg, rgb(11 12 14 / 0.75) 0%, rgb(11 12 14 / 0) 48%);
+    background: linear-gradient(180deg, rgb(11 12 14 / 0.86) 0%, rgb(11 12 14 / 0.72) 30%, rgb(11 12 14 / 0) 60%);
   }
   .film__shade--light {
-    background: linear-gradient(180deg, rgb(233 225 212 / 0.8) 0%, rgb(233 225 212 / 0) 48%);
+    background: linear-gradient(180deg, rgb(233 225 212 / 0.86) 0%, rgb(233 225 212 / 0.72) 30%, rgb(233 225 212 / 0) 60%);
   }
 }
 

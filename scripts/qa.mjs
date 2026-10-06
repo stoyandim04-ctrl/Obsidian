@@ -21,7 +21,11 @@ async function ctx(browser, opts = {}) {
   const errors = [];
   page.on("console", (m) => m.type() === "error" && errors.push(m.text()));
   page.on("pageerror", (e) => errors.push(String(e)));
-  page.on("requestfailed", (r) => errors.push(`request failed: ${r.url()} ${r.failure()?.errorText}`));
+  page.on("requestfailed", (r) => {
+    // film frames still streaming when a test reloads or navigates are aborted by the browser: expected
+    if (r.failure()?.errorText === "net::ERR_ABORTED" && r.url().includes("/media/film/")) return;
+    errors.push(`request failed: ${r.url()} ${r.failure()?.errorText}`);
+  });
   page.on("response", (r) => r.status() >= 400 && errors.push(`HTTP ${r.status()} ${r.url()}`));
   return { c, page, errors };
 }
@@ -283,7 +287,12 @@ await browser.close();
           const copies = [...document.querySelectorAll(`${s} .film__copy`)];
           const top = copies.reduce((a, x) => (Number(getComputedStyle(x).opacity) > Number(getComputedStyle(a).opacity) ? x : a));
           const items = [...top.querySelectorAll("h1, h2, h3, p")].filter((e) => e.offsetWidth && !e.closest(".btn")).map((e) => {
-            const r = e.getBoundingClientRect();
+            // the union of the text's line boxes, not the (often much wider) block box
+            const range = document.createRange();
+            range.selectNodeContents(e);
+            const rects = [...range.getClientRects()].filter((q) => q.width > 1 && q.height > 1);
+            const x0 = Math.min(...rects.map((q) => q.left)), y0 = Math.min(...rects.map((q) => q.top));
+            const r = { left: x0, top: y0, width: Math.max(...rects.map((q) => q.right)) - x0, height: Math.max(...rects.map((q) => q.bottom)) - y0 };
             const cs = getComputedStyle(e);
             const px = parseFloat(cs.fontSize);
             const large = px >= 24 || (px >= 18.66 && Number(cs.fontWeight) >= 700);
