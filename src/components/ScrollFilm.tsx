@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNod
 import { useMotion } from "../media/motion";
 import { useMediaQuery } from "../media/hooks";
 import "./ScrollFilm.css";
+import { atlasSlot, chapterOpacity, loadOrder, remapProgress } from "./filmMath";
 
 export interface FilmSource {
   /** Folder under /media/film/, frames named 0000.webp … */
@@ -42,7 +43,6 @@ interface Props {
 
 const BASE = `${import.meta.env.BASE_URL}media/film/`;
 const src = (s: FilmSource, i: number) => `${BASE}${s.dir}/${String(i).padStart(4, "0")}.webp`;
-const FADE = 0.035;
 
 /**
  * Preview packaging only (scripts/build-artifact.mjs sets window.__FILM_ATLAS): frames packed N per
@@ -63,58 +63,18 @@ function Still({ source, index, eager }: { source: FilmSource; index: number; ea
   if (!ATLAS) {
     return <img src={src(source, index)} width={source.width} height={source.height} alt="" loading={eager ? "eager" : "lazy"} />;
   }
-  const units = unitsFor(source.count);
-  const slot = Math.floor(index / units);
+  const [atlas, slot] = atlasSlot(index, source.count, ATLAS);
   return (
     <div
       className="film__still-frame"
       style={{
         aspectRatio: `${source.width} / ${source.height}`,
-        backgroundImage: `url(${atlasSrc(source, index % units)})`,
+        backgroundImage: `url(${atlasSrc(source, atlas)})`,
         backgroundSize: `100% ${ATLAS * 100}%`,
         backgroundPosition: `0 ${ATLAS > 1 ? (slot / (ATLAS - 1)) * 100 : 0}%`,
       }}
     />
   );
-}
-
-/** Load order: coarse to fine, so any scroll position gets a nearby frame quickly. */
-function loadOrder(n: number): number[] {
-  const seen = new Set<number>();
-  const order: number[] = [];
-  const push = (i: number) => {
-    if (i >= 0 && i < n && !seen.has(i)) {
-      seen.add(i);
-      order.push(i);
-    }
-  };
-  push(0);
-  push(n - 1);
-  for (const step of [32, 16, 8, 4, 2, 1]) for (let i = 0; i < n; i += step) push(i);
-  return order;
-}
-
-function chapterOpacity(c: Chapter, p: number): number {
-  if (c.pinStart && p <= c.to - FADE) return 1;
-  if (p < c.from - FADE || p > c.to + FADE) return 0;
-  if (p < c.from + FADE) return (p - (c.from - FADE)) / (2 * FADE);
-  if (p > c.to - FADE) return ((c.to + FADE) - p) / (2 * FADE);
-  return 1;
-}
-
-function remapProgress(p: number, keys?: [number, number][]): number {
-  if (!keys?.length) return p;
-  if (p <= keys[0][0]) return keys[0][1];
-  for (let i = 1; i < keys.length; i++) {
-    const [p0, f0] = keys[i - 1];
-    const [p1, f1] = keys[i];
-    if (p <= p1) {
-      const u = p1 > p0 ? (p - p0) / (p1 - p0) : 1;
-      const e = u * u * (3 - 2 * u);
-      return f0 + (f1 - f0) * e;
-    }
-  }
-  return keys[keys.length - 1][1];
 }
 
 export function ScrollFilm({ id, label, desktop, mobile, length, chapters, anchors = [], priority, remap }: Props) {
