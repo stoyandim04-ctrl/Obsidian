@@ -40,7 +40,9 @@ if (which === "reveal") {
       console.warn("missing", src);
       continue;
     }
-    const files = fs.readdirSync(dir).filter((f) => f.endsWith(".png")).sort().map((f) => path.join(dir, f));
+    // render_reveal.sh renders every 2nd frame of the 240-frame path; ignore any other frames in the folder
+    const files = fs.readdirSync(dir).filter((f) => /^f\d{4}\.png$/.test(f) && Number(f.slice(1, 5)) % 2 === 0).sort().map((f) => path.join(dir, f));
+    if (files.length !== 120) console.warn(src, "has", files.length, "of 120 frames");
     await writeFrames(files, dest, { width: w, height: h, lift: true, quality: 76 });
   }
 }

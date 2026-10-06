@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Scroll-scrubbed hero/object sequence: 160 frames desktop (16:9) + 160 frames mobile (9:16).
+# Reveal film (hero → object → cap → atomizer → spray): every 2nd frame of a 240-frame path,
+# 120 frames desktop (16:9, 1920×1080) + 120 frames mobile (9:16, 1080×1920). Existing frames are skipped.
 set -u
 cd "$(dirname "$0")/../.."
 PY=/opt/bpyenv/bin/python

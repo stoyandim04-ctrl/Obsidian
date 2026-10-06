@@ -2,17 +2,21 @@
 
 **World:** black glass / volcanic stone / amber light / precise typography / controlled motion.
 **First impression:** a carefully photographed fragrance campaign that is also a usable product page.
-**Signature moment:** the single sticky "The Object" sequence on desktop (O0 → O3). Everything else stays quiet.
+**Signature moment:** two full-screen scroll films. The bottle is revealed, opened and sprayed; the spray
+becomes bergamot, iris and amber, and the stone becomes the plinth the bottle returns to. Copy changes
+colour with each scene. The product interface after the films stays quiet.
 
 ## Decisions (made before code)
 
 1. **Audience** — prospective clients of 13:33; in three seconds they should read "campaign", not "template".
-2. **References** (owner's screen recordings) — principles only: the product is the hero, scroll reveals the
-   object, macro detail, very little interface chrome. No layout copied.
+2. **References** (owner's screen recordings) — principles only: full-screen scroll-scrubbed cinematic
+   scenes for the whole visit, changing scenes and coloured type, macro detail, very little interface
+   chrome. No layout or footage copied.
 3. **Palette** — one dark family, one light editorial surface, one accent used for meaning
    (eyebrows, active storyboard note, focus ring). Never decorative gold.
 4. **Type** — one display serif with character + one readable sans; a fixed six-step scale.
-5. **Motion** — one hero loop, one scroll-linked sequence, 640 ms entrances. All of it can be paused.
+5. **Motion** — scroll-scrubbed frame sequences (the visitor controls time), 3.5 % copy fades, one closing
+   light crossfade. All of it can be paused; paused, the films become still frames with the same copy.
 
 ## Colour tokens (`src/styles/base.css`)
 
@@ -23,8 +27,6 @@
 | `--text` | `#F2EEE7` | Main text, primary button |
 | `--muted` | `#B9B2A8` | Secondary text |
 | `--accent` | `#B89261` | Eyebrows, active state, focus outline |
-| `--paper` | `#E9E1D4` | The single light editorial band (Heart chapter) |
-| `--ink` / `--ink-muted` / `--accent-on-paper` | `#17161A` / `#5B544B` / `#7A5B34` | Text on paper |
 | `--line` | `rgb(242 238 231 / 0.14)` | Hairlines instead of boxes |
 
 ### Measured contrast (WCAG 2.x relative luminance)
@@ -35,10 +37,6 @@
 | muted on bg | 9.31:1 |
 | accent on bg | 6.82:1 |
 | muted on surface | 8.61:1 |
-| ink on paper | 13.88:1 |
-| ink-muted on paper | 5.75:1 |
-| accent-on-paper on paper | 4.80:1 |
-| accent `#B89261` on paper | 2.21:1 → **not used** for text on paper |
 
 ## Typography
 
@@ -104,8 +102,20 @@ Grey translucent glass (absorption too low) · silver-looking cap (softbox refle
 covering the label · visible floor horizon · light leaks on the floor · "melted" shoulder refractions in
 the macro shots (fixed by lowering the camera to 3–4°).
 
-## Imagery for scent chapters
+## Imagery for the notes film
 
-Generated still lifes (Higgsfield → Nano Banana Pro, 2400×1792; first drafts in Figma) graded in
-`build-media.mjs` (saturation 0.86, slight warm channel balance) so they share the campaign palette.
+Generated still lifes (Higgsfield → Nano Banana Pro; first drafts in Figma) reframed to 16:9 and 9:16,
+then linked by Kling 3.0 start/end-frame transitions. Frames are graded in `build-film.mjs`
+(saturation 0.9, slight warm channel balance) so they share the campaign palette. The first transition
+starts on the last Blender spray frame, and the last one ends on a Blender render of the empty plinth,
+so the generated film is bracketed by the deterministic product on both sides.
 No bottle, no text, no logos in generated media — the product only ever comes from Blender.
+
+### Scene colours (chapter tones, `src/data/films.tsx`)
+
+| Scene | Text / accent / muted | Shade |
+| --- | --- | --- |
+| Reveal, Return | `#F2EEE7` / `#B89261` / `#B9B2A8` | dark |
+| Opening (bergamot) | `#F4F1E4` / `#D9D27C` / `#C3BFA8` | dark |
+| Heart (iris, light travertine) | `#1D1922` / `#6F5C8E` / `#4C4455` | light |
+| Base (amber) | `#F7EBDA` / `#E3A04B` / `#D2C2AD` | dark |

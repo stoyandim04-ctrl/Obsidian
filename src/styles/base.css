@@ -34,13 +34,8 @@
   --text: #f2eee7;
   --muted: #b9b2a8;
   --accent: #b89261;
-  --paper: #e9e1d4;
-  --ink: #17161a; /* text on the light editorial surface */
-  --ink-muted: #5b544b;
-  --accent-on-paper: #7a5b34;
   --line: rgb(242 238 231 / 0.14);
   --line-strong: rgb(242 238 231 / 0.28);
-  --line-paper: rgb(23 22 26 / 0.16);
 
   --serif: "Cormorant Garamond", "Cormorant Fallback", Georgia, "Times New Roman", serif;
   --sans: "Hanken Grotesk", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;

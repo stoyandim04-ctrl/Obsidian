@@ -21,25 +21,14 @@ const liftToBg = (img) => img.linear(BG.map((b) => (255 - b) / 255), BG);
 const gradeStill = (img) => img.modulate({ saturation: 0.86, brightness: 0.97 }).linear([1.02, 1.0, 0.95], [0, 0, 0]);
 
 const R = (f) => path.join(ROOT, "source", "renders", f);
-const G = (f) => path.join(ROOT, "source", "generated", f);
 
 const JOBS = [
-  { key: "hero-desktop", src: R("hero_desktop.png"), widths: [960, 1440, 1920, 2560], lift: true },
-  { key: "hero-mobile", src: R("hero_mobile.png"), widths: [600, 900, 1080], lift: true },
-  { key: "object-o0", src: R("object_o0.png"), widths: [720, 1080, 1440], lift: true },
-  { key: "object-o1", src: R("object_o1.png"), widths: [720, 1080, 1440], lift: true },
-  { key: "object-o2", src: R("object_o2.png"), widths: [720, 1080, 1440], lift: true },
-  { key: "object-o3", src: R("object_o3.png"), widths: [720, 1080, 1440], lift: true },
   { key: "product-50", src: R("product_50.png"), widths: [640, 960, 1280, 1600], lift: true },
   { key: "product-100", src: R("product_100.png"), widths: [640, 960, 1280, 1600], lift: true },
   { key: "closing-desktop", src: R("closing_desktop.png"), widths: [1280, 1920, 2560], lift: true },
   { key: "closing-mobile", src: R("closing_mobile.png"), widths: [600, 900, 1200], lift: true },
   { key: "closing-desktop-b", src: R("closing_desktop_b.png"), widths: [1280, 1920, 2560], lift: true },
   { key: "closing-mobile-b", src: R("closing_mobile_b.png"), widths: [600, 900, 1200], lift: true },
-  // Scent stills: Higgsfield (Nano Banana Pro, 2400×1792). Figma originals kept in source/generated for provenance.
-  { key: "scent-opening", src: G("hf_opening_v1.png"), widths: [640, 960, 1280, 1600, 2000], grade: true },
-  { key: "scent-heart", src: G("hf_heart_v1.png"), widths: [640, 960, 1280, 1600, 2000], grade: true },
-  { key: "scent-base", src: G("hf_base_v2.png"), widths: [640, 960, 1280, 1600, 2000], grade: true },
 ];
 
 const filter = process.argv[2];
