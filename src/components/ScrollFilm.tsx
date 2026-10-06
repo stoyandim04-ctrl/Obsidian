@@ -249,7 +249,7 @@ export function ScrollFilm({ id, label, desktop, mobile, length, chapters, ancho
           return (
             <div
               key={c.id}
-              className={`film__copy film__copy--${c.align ?? "left"}`}
+              className={`film__copy film__copy--${c.align ?? "left"} film__chapter--${c.id}`}
               style={{ ...toneStyle(c), opacity: o, transform: `translateY(${(1 - o) * 18}px)`, pointerEvents: o > 0.5 ? "auto" : "none" }}
             >
               {c.children}

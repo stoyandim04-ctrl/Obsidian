@@ -193,8 +193,13 @@
 }
 
 /* hero chapter: headline block + actions; on portrait the actions sit on the dark floor */
-.film__copy--hero {
+.film__chapter--hero {
   max-width: min(46%, 700px);
+}
+
+.film__hero-text {
+  display: grid;
+  gap: var(--s3);
 }
 
 .film__hero-actions {
@@ -216,7 +221,7 @@
 }
 
 @media (max-aspect-ratio: 1/1) {
-  .film__copy--hero {
+  .film__chapter--hero {
     inset: calc(var(--header-h) + 16px) var(--gutter) 20px;
     max-width: none;
     align-content: space-between;
@@ -227,7 +232,25 @@
   .film__hero-actions .hero__ctas > .btn {
     flex: 1 1 100%;
   }
+  /* keep the bottle clear on phones: the secondary CTA duplicates scrolling and the menu */
+  .film__hero-actions .hero__ctas > .btn:not(.btn--primary) {
+    display: none;
+  }
+  .film__hero-text {
+    gap: var(--s2);
+  }
   .film__hero-foot {
     justify-content: space-between;
+  }
+}
+
+/* short phones (e.g. 375×667): a smaller hero type step keeps the copy above the bottle */
+@media (max-aspect-ratio: 1/1) and (max-height: 720px) {
+  .film__chapter--hero .display {
+    font-size: 2.75rem;
+  }
+  .film__chapter--hero .lead {
+    font-size: 1rem;
+    line-height: 1.45;
   }
 }
