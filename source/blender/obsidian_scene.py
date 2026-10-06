@@ -735,6 +735,32 @@ def shot(name, size_ml="50"):
         S["anim"] = lambda f, n: reveal_motion(cam, lights, parts, base_z, dist, mobile, f / (n - 1), drops)
         place_orbit(cam, target, dist, 0, 3.5)
 
+    elif name in ("plinth_film", "plinth_film_mobile"):
+        # Final frames of the notes film: the closing plinth, framed 16:9 / 9:16, with or without the bottle.
+        lights = studio(glow=True)
+        plinth()
+        bottle.location.z = 0.32
+        bottle.rotation_euler.z = math.radians(-18)
+        lights["key"].location = (3.2, 0.6, 1.9)
+        lights["key"].data.energy = 1300
+        lights["key"].data.size = 0.5
+        aim(lights["key"], (0, 0, 1.2))
+        lights["fill"].data.energy = 40
+        lights["strip_l"].data.energy = 90
+        lights["sweep"].data.energy = 0
+        cam = camera(lens=70)
+        t = (0, 0, 0.32 + BOTTLE_CENTER_Z * 0.85)
+        if name == "plinth_film":
+            w, h = 1600, 900
+            dist = frame_distance(70, 36 * h / w, 2.25, 0.72)
+            cam.data.shift_x = -0.14
+        else:
+            w, h = 720, 1280
+            dist = frame_distance(70, 36, 2.25, 0.5)
+            cam.data.shift_y = 0.12
+        place_orbit(cam, t, dist, 0, 5)
+        S.update(w=w, h=h, samples=96)
+
     elif name == "turntable":
         lights = studio()
         cam = camera(lens=85)
@@ -918,9 +944,16 @@ def main():
     ap.add_argument("--nframes", type=int, default=144)
     ap.add_argument("--step", type=int, default=1, help="render every Nth frame of the range")
     ap.add_argument("--save-blend", default="")
+    ap.add_argument("--no-bottle", action="store_true", help="hide the bottle (empty set for transitions)")
     a = ap.parse_args(argv)
 
     S = shot(a.shot, a.size)
+    if a.no_bottle:
+        for o in bpy.data.objects["OBSIDIAN_No01"].children_recursive:
+            o.hide_render = True
+        for n in ("PrintLight", "BaseCard"):
+            if n in bpy.data.objects:
+                bpy.data.objects[n].hide_render = True
     setup_render(int(S["w"] * a.scale), int(S["h"] * a.scale), a.samples or S["samples"])
     if a.save_blend:
         bpy.ops.wm.save_as_mainfile(filepath=a.save_blend)

@@ -78,7 +78,7 @@ export default function App() {
           label="The fragrance in three acts: droplets fall and become bergamot and pepper, then iris and cedarwood, then amber resin and vetiver."
           desktop={NOTES.desktop}
           mobile={NOTES.mobile}
-          length={7}
+          length={8.5}
           chapters={NOTES_CHAPTERS}
           remap={NOTES_REMAP}
         />

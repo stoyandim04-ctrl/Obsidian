@@ -33,6 +33,18 @@ async function writeFrames(files, dest, { width, height, lift = false, grade = f
   console.log(dest, files.length, "frames", `${(bytes / 1024 / 1024).toFixed(1)} MB`, `avg ${(bytes / files.length / 1024).toFixed(0)} KB`);
 }
 
+async function appendFrames(files, dest, offset, opts) {
+  const dir = path.join(OUT, dest);
+  for (let i = 0; i < files.length; i++) {
+    const raw = await sharp(files[i]).removeAlpha().toColourspace("srgb").resize({ width: opts.width, height: opts.height, fit: "cover" })
+      .raw({ depth: "uchar" }).toBuffer({ resolveWithObject: true });
+    let img = sharp(raw.data, { raw: raw.info });
+    if (opts.lift) img = img.linear(BG.map((b) => (255 - b) / 255), BG);
+    await img.webp({ quality: opts.quality, effort: 5 }).toFile(path.join(dir, `${String(offset + i).padStart(4, "0")}.webp`));
+  }
+  console.log(dest, "+", files.length, "blend frames");
+}
+
 if (which === "reveal") {
   for (const [src, dest, w, h] of [["reveal_desktop", "reveal-d", 1280, 720], ["reveal_mobile", "reveal-m", 576, 1024]]) {
     const dir = path.join(ROOT, "source/frames", src);
@@ -51,7 +63,7 @@ if (which === "notes") {
     fs.rmSync(tmp, { recursive: true, force: true });
     fs.mkdirSync(tmp, { recursive: true });
     let n = 0;
-    for (const t of ["t0", "t1", "t2"]) {
+    for (const t of ["t0", "t1", "t2", "t3"]) {
       const video = path.join(ROOT, "source/generated", `hf_${t}_${kind}.mp4`);
       const seg = path.join(tmp, t);
       fs.mkdirSync(seg, { recursive: true });
@@ -60,7 +72,22 @@ if (which === "notes") {
       for (const f of fs.readdirSync(seg).sort()) fs.renameSync(path.join(seg, f), path.join(tmp, `${String(n++).padStart(4, "0")}.png`));
       fs.rmSync(seg, { recursive: true });
     }
+    // the bottle appears on the empty plinth: a plain crossfade between two deterministic renders
+    const suffix = kind === "16x9" ? "plinth_film" : "plinth_film_mobile";
+    const empty = path.join(ROOT, "source/renders/plinth", `${suffix}_empty.png`);
+    const full = path.join(ROOT, "source/renders/plinth", `${suffix}_bottle.png`);
+    const BLEND = 24;
+    const base = await sharp(empty).removeAlpha().resize({ width: w, height: h, fit: "cover" }).png().toBuffer();
+    for (let k = 1; k <= BLEND; k++) {
+      const a = k / BLEND;
+      const eased = a * a * (3 - 2 * a);
+      const top = await sharp(full).removeAlpha().resize({ width: w, height: h, fit: "cover" }).ensureAlpha(eased).png().toBuffer();
+      await sharp(base).composite([{ input: top }]).png().toFile(path.join(tmp, `${String(n++).padStart(4, "0")}.png`));
+    }
     const files = fs.readdirSync(tmp).filter((f) => f.endsWith(".png")).sort().map((f) => path.join(tmp, f));
-    await writeFrames(files, dest, { width: w, height: h, grade: true, quality: 80 });
+    // generated frames get the scent grade; the last BLEND frames are renders and get the black lift instead
+    const gen = files.slice(0, files.length - BLEND);
+    await writeFrames(gen, dest, { width: w, height: h, grade: true, quality: 80 });
+    await appendFrames(files.slice(files.length - BLEND), dest, gen.length, { width: w, height: h, lift: true, quality: 80 });
   }
 }

@@ -12,18 +12,26 @@ export const REVEAL = {
 };
 
 export const NOTES = {
-  desktop: { dir: "notes-d", count: 180, width: 1600, height: 900 } satisfies FilmSource,
-  mobile: { dir: "notes-m", count: 180, width: 720, height: 1280 } satisfies FilmSource,
+  desktop: { dir: "notes-d", count: 264, width: 1600, height: 900 } satisfies FilmSource,
+  mobile: { dir: "notes-m", count: 264, width: 720, height: 1280 } satisfies FilmSource,
 };
 
-/** Notes film: three 5 s transitions; the scroll holds on each finished still. */
+/**
+ * Notes film: four 5 s transitions (60 frames each) + 24 frames where the bottle appears on the plinth.
+ * The scroll holds on each finished still so its chapter can be read.
+ */
+const N = 264;
+const at = (frame: number) => frame / (N - 1);
 export const NOTES_REMAP: [number, number][] = [
   [0, 0],
-  [0.22, 1 / 3],
-  [0.34, 1 / 3],
-  [0.56, 2 / 3],
-  [0.68, 2 / 3],
-  [0.9, 1],
+  [0.15, at(59)],
+  [0.23, at(59)],
+  [0.38, at(119)],
+  [0.46, at(119)],
+  [0.61, at(179)],
+  [0.69, at(179)],
+  [0.83, at(239)],
+  [0.92, 1],
   [1, 1],
 ];
 
@@ -127,8 +135,8 @@ export const NOTES_CHAPTERS: Chapter[] = [
   {
     id: "intro",
     from: 0,
-    to: 0.13,
-    still: 0.05,
+    to: 0.1,
+    still: 0.02,
     tone: AMBER,
     children: (
       <>
@@ -140,9 +148,9 @@ export const NOTES_CHAPTERS: Chapter[] = [
   },
   {
     id: "opening",
-    from: 0.2,
-    to: 0.37,
-    still: 1 / 3,
+    from: 0.14,
+    to: 0.26,
+    still: at(59),
     tone: CITRUS,
     children: (
       <>
@@ -155,9 +163,9 @@ export const NOTES_CHAPTERS: Chapter[] = [
   },
   {
     id: "heart",
-    from: 0.54,
-    to: 0.71,
-    still: 2 / 3,
+    from: 0.37,
+    to: 0.49,
+    still: at(119),
     tone: IRIS,
     children: (
       <>
@@ -170,9 +178,9 @@ export const NOTES_CHAPTERS: Chapter[] = [
   },
   {
     id: "base",
-    from: 0.86,
-    to: 1,
-    still: 1,
+    from: 0.6,
+    to: 0.72,
+    still: at(179),
     tone: AMBER,
     children: (
       <>
@@ -180,6 +188,25 @@ export const NOTES_CHAPTERS: Chapter[] = [
         <h3 className="h2">What remains.</h3>
         <p className="film__notes">Amber accord · Vetiver</p>
         <p className="lead">Warmth and earthy depth close the composition.</p>
+      </>
+    ),
+  },
+  {
+    id: "return",
+    from: 0.9,
+    to: 1,
+    still: 1,
+    tone: BRASS,
+    children: (
+      <>
+        <p className="label">OBSIDIAN — No. 01</p>
+        <h2 className="h2">Fifty or a hundred millilitres.</h2>
+        <p className="lead">Choose a size below. A portfolio demo — nothing here is sold.</p>
+        <div>
+          <a className="btn btn--primary" href="#discover">
+            Discover No. 01
+          </a>
+        </div>
       </>
     ),
   },
