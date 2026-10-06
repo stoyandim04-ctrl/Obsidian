@@ -44,6 +44,40 @@ const BASE = `${import.meta.env.BASE_URL}media/film/`;
 const src = (s: FilmSource, i: number) => `${BASE}${s.dir}/${String(i).padStart(4, "0")}.webp`;
 const FADE = 0.035;
 
+/**
+ * Preview packaging only (scripts/build-artifact.mjs sets window.__FILM_ATLAS): frames packed N per
+ * file, interleaved — atlas j holds frames j, j+A, j+2A … (A = number of atlases) stacked vertically —
+ * so every atlas covers the whole film and coarse-to-fine loading still works. 0 = one file per frame.
+ */
+const ATLAS = typeof window === "undefined" ? 0 : Number((window as { __FILM_ATLAS?: number }).__FILM_ATLAS ?? 0);
+const atlasSrc = (s: FilmSource, j: number) => `${BASE}${s.dir}/a${String(j).padStart(3, "0")}.webp`;
+const unitsFor = (n: number) => (ATLAS ? Math.ceil(n / ATLAS) : n);
+
+interface Frame {
+  img: HTMLImageElement;
+  slot: number;
+}
+
+/** One film frame as a still picture (motion off). */
+function Still({ source, index, eager }: { source: FilmSource; index: number; eager?: boolean }) {
+  if (!ATLAS) {
+    return <img src={src(source, index)} width={source.width} height={source.height} alt="" loading={eager ? "eager" : "lazy"} />;
+  }
+  const units = unitsFor(source.count);
+  const slot = Math.floor(index / units);
+  return (
+    <div
+      className="film__still-frame"
+      style={{
+        aspectRatio: `${source.width} / ${source.height}`,
+        backgroundImage: `url(${atlasSrc(source, index % units)})`,
+        backgroundSize: `100% ${ATLAS * 100}%`,
+        backgroundPosition: `0 ${ATLAS > 1 ? (slot / (ATLAS - 1)) * 100 : 0}%`,
+      }}
+    />
+  );
+}
+
 /** Load order: coarse to fine, so any scroll position gets a nearby frame quickly. */
 function loadOrder(n: number): number[] {
   const seen = new Set<number>();
@@ -89,7 +123,7 @@ export function ScrollFilm({ id, label, desktop, mobile, length, chapters, ancho
   const source = isDesktop ? desktop : mobile;
   const section = useRef<HTMLElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
-  const frames = useRef<(HTMLImageElement | null)[]>([]);
+  const frames = useRef<(Frame | null)[]>([]);
   const progress = useRef(0);
   const drawn = useRef(-1);
   const [p, setP] = useState(0);
@@ -122,15 +156,17 @@ export function ScrollFilm({ id, label, desktop, mobile, length, chapters, ancho
         }
       }
       if (idx < 0 || (idx === drawn.current && !force)) return;
-      const img = list[idx]!;
+      const { img, slot } = list[idx]!;
       const ctx = c.getContext("2d");
       if (!ctx) return;
+      const fw = img.naturalWidth;
+      const fh = ATLAS ? img.naturalHeight / ATLAS : img.naturalHeight;
       const cw = c.width;
       const ch = c.height;
-      const s = Math.max(cw / img.naturalWidth, ch / img.naturalHeight);
-      const w = img.naturalWidth * s;
-      const h = img.naturalHeight * s;
-      ctx.drawImage(img, (cw - w) / 2, (ch - h) / 2, w, h);
+      const s = Math.max(cw / fw, ch / fh);
+      const w = fw * s;
+      const h = fh * s;
+      ctx.drawImage(img, 0, slot * fh, fw, fh, (cw - w) / 2, (ch - h) / 2, w, h);
       drawn.current = idx;
     },
     [],
@@ -141,23 +177,25 @@ export function ScrollFilm({ id, label, desktop, mobile, length, chapters, ancho
     if (!near || !enabled) return;
     let cancelled = false;
     const n = source.count;
+    const units = unitsFor(n);
     frames.current = new Array(n).fill(null);
     drawn.current = -1;
-    const order = loadOrder(n);
+    const order = loadOrder(units);
     let next = 0;
     const worker = async () => {
       while (!cancelled && next < order.length) {
-        const i = order[next++];
+        const j = order[next++];
         const img = new Image();
         img.decoding = "async";
-        img.src = src(source, i);
+        img.src = ATLAS ? atlasSrc(source, j) : src(source, j);
         try {
           await img.decode();
         } catch {
           continue;
         }
         if (cancelled) return;
-        frames.current[i] = img;
+        if (ATLAS) for (let k = 0; k < ATLAS && j + k * units < n; k++) frames.current[j + k * units] = { img, slot: k };
+        else frames.current[j] = { img, slot: 0 };
         draw();
       }
     };
@@ -220,13 +258,7 @@ export function ScrollFilm({ id, label, desktop, mobile, length, chapters, ancho
         ))}
         {chapters.map((c) => (
           <div key={c.id} className={`film__still film__still--${c.align ?? "left"}`} style={toneStyle(c)}>
-            <img
-              src={src(source, Math.round(c.still * (source.count - 1)))}
-              width={source.width}
-              height={source.height}
-              alt=""
-              loading={priority && c === chapters[0] ? "eager" : "lazy"}
-            />
+            <Still source={source} index={Math.round(c.still * (source.count - 1))} eager={priority && c === chapters[0]} />
             <div className="film__copy film__copy--static">{c.children}</div>
           </div>
         ))}
@@ -240,7 +272,7 @@ export function ScrollFilm({ id, label, desktop, mobile, length, chapters, ancho
         <span key={a.id} id={a.id} className="film__anchor" style={{ top: `${a.at * 100}%` }} />
       ))}
       <div className="film__stage">
-        {priority && (
+        {priority && !ATLAS && (
           <img
             className="film__poster"
             src={src(source, 0)}

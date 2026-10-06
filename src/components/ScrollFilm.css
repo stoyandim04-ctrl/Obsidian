@@ -152,6 +152,11 @@
   object-fit: cover;
 }
 
+.film--static .film__still-frame {
+  width: 100%;
+  background-repeat: no-repeat;
+}
+
 .film--static .film__copy--static {
   position: static;
   translate: none;

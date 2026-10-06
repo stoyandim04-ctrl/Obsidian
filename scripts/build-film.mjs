@@ -34,7 +34,13 @@ async function writeFrames(files, dest, { width, height, lift = false, grade = f
 }
 
 if (which === "reveal") {
-  for (const [src, dest, w, h] of [["reveal_desktop", "reveal-d", 1280, 720], ["reveal_mobile", "reveal-m", 576, 1024]]) {
+  // the 1.5× HD pass (render_reveal_hd.sh) is used as soon as it is complete; never upscale
+  const even = (dir) => (fs.existsSync(dir) ? fs.readdirSync(dir).filter((f) => /^f\d{4}\.png$/.test(f) && Number(f.slice(1, 5)) % 2 === 0) : []);
+  for (const [base, dest, w, h] of [["reveal_desktop", "reveal-d", 1280, 720], ["reveal_mobile", "reveal-m", 576, 1024]]) {
+    const hd = even(path.join(ROOT, "source/frames", `${base}_hd`)).length === 120;
+    const src = hd ? `${base}_hd` : base;
+    const [W, H] = hd ? [w * 1.5, h * 1.5] : [w, h];
+    console.log(dest, hd ? "HD" : "standard", `${W}x${H}`);
     const dir = path.join(ROOT, "source/frames", src);
     if (!fs.existsSync(dir)) {
       console.warn("missing", src);
@@ -43,7 +49,7 @@ if (which === "reveal") {
     // render_reveal.sh renders every 2nd frame of the 240-frame path; ignore any other frames in the folder
     const files = fs.readdirSync(dir).filter((f) => /^f\d{4}\.png$/.test(f) && Number(f.slice(1, 5)) % 2 === 0).sort().map((f) => path.join(dir, f));
     if (files.length !== 120) console.warn(src, "has", files.length, "of 120 frames");
-    await writeFrames(files, dest, { width: w, height: h, lift: true, quality: 76 });
+    await writeFrames(files, dest, { width: W, height: H, lift: true, quality: 76 });
   }
 }
 
