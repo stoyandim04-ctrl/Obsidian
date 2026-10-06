@@ -1,7 +1,7 @@
 import { lazy, Suspense, useMemo, useRef, useState } from "react";
 import { Picture } from "./Picture";
 import { DEFAULT_SIZE, formatPrice, PRODUCT, VARIANTS, variantBySize, type SizeId, type Variant } from "../data/product";
-import { webglAvailable } from "../viewer/BottleViewer";
+import { webglAvailable } from "../viewer/webgl";
 import "./ProductSelection.css";
 
 const ProductViewer = lazy(() => import("./ProductViewer"));

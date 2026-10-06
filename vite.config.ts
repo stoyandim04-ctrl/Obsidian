@@ -7,13 +7,6 @@ export default defineConfig({
   build: {
     target: "es2022",
     assetsInlineLimit: 0,
-    rollupOptions: {
-      output: {
-        manualChunks(id) {
-          if (id.includes("node_modules/three")) return "three";
-        },
-      },
-    },
   },
   test: {
     environment: "node",

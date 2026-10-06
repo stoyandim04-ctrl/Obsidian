@@ -56,10 +56,12 @@ function studioEnvironment(): Scene {
     m.lookAt(0, lookY, 0);
     env.add(m);
   };
-  card(1.2, 6, [6.0, 3.9, 2.3], 5.5, 2.5, -3.5); // warm key / rim, behind right
-  card(0.35, 5, [2.6, 2.1, 1.7], -6, 2.2, -1.5); // thin strip, left
-  card(4, 4, [0.35, 0.36, 0.4], 0, 9, 2, 0); // faint top soft
-  card(0.2, 4, [3.2, 2.2, 1.3], 4, 2.6, 5); // shoulder sweep, front right
+  card(1.2, 6, [9.0, 5.6, 3.2], 5.5, 2.5, -3.5); // warm key / rim, behind right
+  card(0.5, 6, [4.5, 3.6, 2.9], -6, 2.2, -1.5); // strip, left — clean edge highlight
+  card(0.5, 6, [3.2, 2.2, 1.4], 6, 2.2, 1.5); // strip, right
+  card(4, 4, [0.5, 0.5, 0.55], 0, 9, 2, 0); // faint top soft
+  card(5, 3, [0.16, 0.15, 0.14], -3.5, 1.6, 7); // broad soft card front-left: gradient on the front plane
+  card(0.25, 4, [4.0, 2.8, 1.6], 4, 2.6, 5); // shoulder sweep, front right
   return env;
 }
 
@@ -152,11 +154,12 @@ export class BottleViewer {
         sheen: 1,
         sheenColor: new Color(0x7a3e12),
         sheenRoughness: 0.35,
-        envMapIntensity: 1.25,
+        envMapIntensity: 1.8,
       });
       const cap = new MeshStandardMaterial({ color: 0x0b0b0c, roughness: 0.42, metalness: 0.0, envMapIntensity: 0.9 });
       const brass = new MeshStandardMaterial({ color: 0xc89b63, roughness: 0.26, metalness: 1, envMapIntensity: 1.4 });
-      const print = new MeshStandardMaterial({ transparent: true, roughness: 0.6, metalness: 0, depthWrite: false });
+      // the print is lit by its own light in the renders; here it is unlit so it always reads
+      const print = new MeshBasicMaterial({ transparent: true, depthWrite: false, color: new Color(0.86, 0.84, 0.8) });
       this.disposables.push(glass, cap, brass, print);
       gltf.scene.traverse((o: Object3D) => {
         const m = o as Mesh;
@@ -196,7 +199,7 @@ export class BottleViewer {
       this.disposables.push(tex);
     }
     if (this.disposed) return;
-    const mat = this.label.material as MeshStandardMaterial;
+    const mat = this.label.material as MeshBasicMaterial;
     mat.map = tex;
     mat.needsUpdate = true;
     this.kick();
@@ -271,17 +274,5 @@ export class BottleViewer {
     });
     this.renderer.dispose();
     this.renderer.forceContextLoss();
-  }
-}
-
-/** True when a WebGL context can be created (released immediately). */
-export function webglAvailable(): boolean {
-  try {
-    const c = document.createElement("canvas");
-    const gl = (c.getContext("webgl2") || c.getContext("webgl")) as WebGLRenderingContext | null;
-    gl?.getExtension("WEBGL_lose_context")?.loseContext();
-    return !!gl;
-  } catch {
-    return false;
   }
 }
