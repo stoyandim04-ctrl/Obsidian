@@ -52,7 +52,7 @@
 
 @media (min-width: 900px) {
   .closing {
-    min-height: clamp(520px, 74svh, 960px);
+    min-height: clamp(560px, 80svh, 1000px);
   }
   .closing__media {
     position: absolute;
